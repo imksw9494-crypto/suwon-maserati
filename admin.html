@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>매물 관리 | 더원오토</title>
+<meta name="theme-color" content="#070E1B">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230A1528'/%3E%3Cpath d='M16 46h32' stroke='%23C8A86E' stroke-width='2'/%3E%3Ctext x='32' y='40' text-anchor='middle' font-family='Georgia,serif' font-size='30' fill='%23E4D0A6'%3E1%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="admin.css">
+</head>
+<body>
+
+<header class="top">
+  <div class="top-in">
+    <a class="brand" href="index.html"><b>THE ONE AUTO</b><span>매물 관리</span></a>
+    <div class="top-r">
+      <span class="who" id="who" hidden></span>
+      <a class="tbtn" href="index.html" target="_blank" rel="noopener">사이트 보기</a>
+      <button class="tbtn" id="logout" hidden>로그아웃</button>
+    </div>
+  </div>
+</header>
+
+<div class="demo-bar" id="demoBar" hidden>체험 모드입니다. 여기서 등록·수정한 내용은 저장되지 않고, 새로 고치면 사라집니다.</div>
+
+<!-- ============ 1. 연결 전 안내 ============ -->
+<main class="view narrow" id="vSetup" hidden>
+  <p class="eyebrow">Setup</p>
+  <h1>매물 저장소가 아직 연결되지 않았습니다.</h1>
+  <p class="sub">아래 순서로 한 번만 준비하면, 이 화면에서 로그인해 매물을 바로 올릴 수 있습니다.</p>
+  <ol class="steps">
+    <li><b>Supabase 가입 후 프로젝트 만들기</b><span>supabase.com 에서 무료로 가입하고 새 프로젝트를 하나 만듭니다. 지역은 Seoul 을 고르면 됩니다.</span></li>
+    <li><b>설정 파일 실행하기</b><span>함께 받은 <code>supabase-setup.sql</code> 맨 아래 이메일을 직원 이메일로 바꾼 뒤, SQL Editor 에 붙여 넣고 Run 을 누릅니다.</span></li>
+    <li><b>직원 계정 만들기</b><span>Authentication → Users 에서 같은 이메일로 사용자를 추가하고 비밀번호를 정합니다.</span></li>
+    <li><b>연결 정보 넣기</b><span>프로젝트 주소와 Publishable key 를 <code>config.js</code> 에 넣고 사이트를 다시 올립니다.</span></li>
+  </ol>
+  <div class="row-btns">
+    <button class="btn primary" id="startDemo">체험 모드로 둘러보기</button>
+    <a class="btn" href="index.html">사이트로 돌아가기</a>
+  </div>
+</main>
+
+<!-- ============ 2. 로그인 ============ -->
+<main class="view narrow" id="vLogin" hidden>
+  <p class="eyebrow">Sign in</p>
+  <h1>관리자 로그인</h1>
+  <p class="sub">등록된 직원 계정으로 로그인해 주세요.</p>
+  <form class="card" id="loginForm" novalidate>
+    <label class="f"><span>이메일</span><input type="email" name="email" autocomplete="username" required></label>
+    <label class="f"><span>비밀번호</span><input type="password" name="password" autocomplete="current-password" required></label>
+    <p class="err" id="loginErr" hidden></p>
+    <button class="btn primary wide" type="submit">로그인</button>
+  </form>
+</main>
+
+<!-- ============ 3. 매물 목록 ============ -->
+<main class="view" id="vList" hidden>
+  <div class="head">
+    <div>
+      <p class="eyebrow">Inventory</p>
+      <h1>매물 <span id="total">0</span>대</h1>
+      <p class="sub" id="statLine"></p>
+    </div>
+    <button class="btn primary" id="addBtn"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M7 1v12M1 7h12"/></svg>매물 등록</button>
+  </div>
+  <div class="tools">
+    <input class="search" id="q" type="search" placeholder="모델·트림·색상으로 찾기" aria-label="매물 찾기">
+    <select id="fModel" aria-label="모델"></select>
+    <select id="fStat" aria-label="상태">
+      <option value="">전체 상태</option><option>판매중</option><option>예약중</option><option>판매완료</option>
+    </select>
+  </div>
+  <div class="list" id="list"></div>
+</main>
+
+<!-- ============ 4. 등록 · 수정 ============ -->
+<main class="view" id="vEdit" hidden>
+  <button class="back" id="backBtn"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 1.500 3.500 7 9 12.500"/></svg>목록으로</button>
+  <h1 id="editTitle">매물 등록</h1>
+
+  <form id="carForm" novalidate>
+    <section class="card">
+      <h2>기본 정보 <small>* 표시는 꼭 입력해 주세요</small></h2>
+      <div class="g3">
+        <label class="f"><span>모델 *</span><select name="model" required></select></label>
+        <label class="f"><span>트림 *</span><input name="trim" list="trimList" placeholder="예: GT, Modena, Trofeo" required><datalist id="trimList"></datalist></label>
+        <label class="f"><span>상태</span><select name="status"><option>판매중</option><option>예약중</option><option>판매완료</option></select></label>
+      </div>
+      <div class="g4">
+        <label class="f"><span>연식 (년) *</span><input name="year" type="number" inputmode="numeric" min="2000" max="2100" placeholder="2023" required></label>
+        <label class="f"><span>최초 등록 (월)</span><select name="month"><option value="">선택 안 함</option></select></label>
+        <label class="f"><span>주행거리 (km) *</span><input name="mileage" type="text" inputmode="numeric" placeholder="18,400" required></label>
+        <label class="f"><span>가격 (만원) *</span><input name="price" type="text" inputmode="numeric" placeholder="7,650" required><em class="hint" id="priceHint"></em></label>
+      </div>
+      <div class="checks">
+        <label class="ck"><input type="checkbox" name="featured"><span>메인 화면 "지금 만날 수 있는 매물"에 노출</span></label>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>사진 <small>첫 번째 사진이 대표 사진입니다 · 올릴 때 자동으로 용량을 줄입니다</small></h2>
+      <div class="drop" id="drop">
+        <input type="file" id="fileInput" accept="image/*" multiple hidden>
+        <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.400" stroke-linecap="round" stroke-linejoin="round"><path d="M4 16.500V18a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-1.500M12 15V4m0 0L7.500 8.500M12 4l4.500 4.500"/></svg>
+        <p><b>사진을 끌어다 놓거나 눌러서 선택</b></p>
+        <p class="hint">여러 장을 한 번에 고를 수 있습니다 (권장 30장 이하)</p>
+      </div>
+      <div class="photos" id="photos"></div>
+      <div class="checks">
+        <label class="ck"><input type="checkbox" name="cutout"><span>대표 사진이 배경을 지운 누끼 사진입니다 (차량이 잘리지 않게 여백을 두고 표시)</span></label>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>제원 <small>트림을 고르면 알려진 제원을 자동으로 채웁니다 · 실제 차량과 맞는지 확인해 주세요</small></h2>
+      <div class="g3">
+        <label class="f"><span>연료</span><input name="fuel" list="fuelList" placeholder="가솔린"><datalist id="fuelList"><option value="가솔린"><option value="가솔린 · 마일드 하이브리드"><option value="디젤"><option value="전기"></datalist></label>
+        <label class="f"><span>엔진 · 배기량</span><input name="displacement" placeholder="1,995cc"></label>
+        <label class="f"><span>최고 출력</span><input name="power" placeholder="300마력"></label>
+      </div>
+      <div class="g4">
+        <label class="f"><span>변속기</span><input name="transmission" list="tmList" placeholder="8단 자동"><datalist id="tmList"><option value="8단 자동"><option value="8단 DCT"></datalist></label>
+        <label class="f"><span>구동</span><input name="drive" list="drList" placeholder="AWD"><datalist id="drList"><option value="AWD"><option value="AWD (Q4)"><option value="RWD"><option value="MR (미드십 후륜)"></datalist></label>
+        <label class="f"><span>외장 색상</span><input name="color" placeholder="블루"></label>
+        <label class="f"><span>내장</span><input name="interior" placeholder="탄 가죽"></label>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>옵션 · 이력</h2>
+      <label class="f"><span>주요 옵션 <small>한 줄에 하나씩, 또는 쉼표로 구분</small></span><textarea name="options" rows="5" placeholder="파노라마 선루프&#10;소너스 파베르 사운드&#10;어댑티브 크루즈 컨트롤"></textarea></label>
+      <div class="g3">
+        <label class="f"><span>사고 이력</span><input name="accident" list="accList" placeholder="무사고"><datalist id="accList"><option value="무사고"><option value="단순 교환"><option value="상담 시 안내"></datalist></label>
+        <label class="f"><span>소유 이력</span><input name="owners" list="ownList" placeholder="1인 소유"><datalist id="ownList"><option value="1인 소유"><option value="2인 소유"><option value="3인 이상"></datalist></label>
+        <label class="f"><span>정비 이력</span><input name="service" placeholder="공식 서비스센터 정비 이력"></label>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>소개 글</h2>
+      <label class="f"><span>차량 한두 문장 소개 <small>상세 페이지 가격 아래에 표시됩니다</small></span><textarea name="description" rows="3" placeholder="1인 소유, 정기 점검 이력이 모두 확인된 차량입니다."></textarea></label>
+    </section>
+
+    <div class="savebar">
+      <p class="progress" id="progress" hidden></p>
+      <button class="btn" type="button" id="cancelBtn">취소</button>
+      <button class="btn primary" type="submit" id="saveBtn">저장</button>
+    </div>
+  </form>
+</main>
+
+<!-- 확인 창 -->
+<div class="modal" id="confirm" role="dialog" aria-modal="true" aria-labelledby="cfTitle">
+  <div class="modal-box">
+    <h3 id="cfTitle"></h3>
+    <p id="cfText"></p>
+    <div class="row-btns end"><button class="btn" id="cfNo">취소</button><button class="btn danger" id="cfYes">삭제</button></div>
+  </div>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="config.js"></script>
+<script src="cars.js"></script>
+<script src="admin.js"></script>
+</body>
+</html>
