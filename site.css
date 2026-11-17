@@ -57,6 +57,7 @@ ul{list-style:none}
 .nav.solid,.nav.open{background:rgba(7,14,27,.78);-webkit-backdrop-filter:saturate(180%) blur(20px);backdrop-filter:saturate(180%) blur(20px);border-color:var(--line-d)}
 .nav-in{height:100%;display:flex;align-items:center;justify-content:space-between;gap:24px}
 .brand{display:flex;align-items:center;gap:14px}
+.brand-logo{height:40px;width:auto;flex:none}
 .brand-mark{font-size:15px;font-weight:700;letter-spacing:.28em;white-space:nowrap}
 .brand-sub{padding-left:14px;border-left:1px solid var(--gold);font-size:11px;letter-spacing:.14em;color:var(--gold-soft);white-space:nowrap;line-height:1.2}
 .menu{display:flex;gap:34px;font-size:14px;color:rgba(245,242,234,.78)}
@@ -471,6 +472,8 @@ input[type=range]::-moz-range-thumb{width:14px;height:14px;border-radius:50%;bac
   body{font-size:16px}
   .wrap{width:calc(100% - 40px)}
   .brand-sub{display:none}
+  .brand-logo{height:32px}
+  .brand-mark{font-size:12.5px;letter-spacing:.2em}
   .nav-cta .btn{display:none}
   .bar{display:flex}
   .hero{height:165vh}
