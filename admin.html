@@ -25,6 +25,7 @@
   </div>
 </header>
 
+<nav class="tabs" id="tabs" hidden><div class="tabs-in"><button class="tab on" data-tab="vList">매물</button><button class="tab" data-tab="vInq">상담 신청<b id="inqBadge" hidden>0</b></button></div></nav>
 <div class="demo-bar" id="demoBar" hidden>체험 모드입니다. 여기서 등록·수정한 내용은 저장되지 않고, 새로 고치면 사라집니다.</div>
 
 <!-- ============ 1. 연결 전 안내 ============ -->
@@ -75,6 +76,23 @@
     </select>
   </div>
   <div class="list" id="list"></div>
+</main>
+
+<!-- ============ 3-2. 상담 신청 ============ -->
+<main class="view" id="vInq" hidden>
+  <div class="head">
+    <div>
+      <p class="eyebrow">Inquiries</p>
+      <h1>상담 신청 <span id="inqTotal">0</span>건</h1>
+      <p class="sub" id="inqLine"></p>
+    </div>
+    <button class="btn" id="inqReload">새로 고침</button>
+  </div>
+  <div class="tools" style="grid-template-columns:1fr 170px">
+    <input class="search" id="inqQ" type="search" placeholder="이름·연락처·내용으로 찾기" aria-label="상담 찾기">
+    <select id="inqStat" aria-label="상태"><option value="">전체 상태</option><option>신규</option><option>연락 완료</option><option>종료</option></select>
+  </div>
+  <div class="list" id="inqList"></div>
 </main>
 
 <!-- ============ 4. 등록 · 수정 ============ -->

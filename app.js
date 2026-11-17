@@ -6,6 +6,7 @@
   let CARS = [];            // 매물 목록 (저장소 또는 예시 데이터에서 채움)
   let SAMPLE = true;        // 예시 데이터를 쓰는 중인지
   let LOAD_ERR = false;     // 저장소에서 불러오기 실패
+  let sb = null;            // 저장소 연결 (연결 정보가 있을 때만)
   const DB = window.DB || {};
   const SITE = window.SITE || {};
   const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -14,17 +15,17 @@
   /* ---------- 모델 정보 ---------- */
   const MODELS = {
     grecale:      { ko: '그레칼레',     en: 'Grecale',      body: '컴팩트 SUV',       engine: '2.0 MHEV · V6',   drive: 'AWD',        tint: '#8A93A3', img: 'img/grecale.webp',
-                    desc: '일상에 가장 가까운 마세라티. 2.0 마일드 하이브리드의 GT·모데나와 네튜노 V6를 얹은 트로페오로 나뉩니다.' },
+                    desc: '일상에 가장 가까운 마세라티<br>2.0 마일드 하이브리드의 GT·모데나와 네튜노 V6를 얹은 트로페오로 나뉩니다' },
     levante:      { ko: '르반떼',       en: 'Levante',      body: '럭셔리 SUV',       engine: '2.0 MHEV · V6 · V8', drive: 'AWD (Q4)',   tint: '#5E9E3A', img: 'img/levante.webp',
-                    desc: '마세라티의 첫 SUV. 넉넉한 차체와 Q4 사륜구동, 하이브리드부터 V8 트로페오까지 폭넓은 선택지를 갖췄습니다.' },
+                    desc: '마세라티의 첫 SUV<br>넉넉한 차체와 Q4 사륜구동, 하이브리드부터 V8 트로페오까지 폭넓은 선택지를 갖췄습니다' },
     ghibli:       { ko: '기블리',       en: 'Ghibli',       body: '스포츠 세단',      engine: '2.0 MHEV · V6 · V8', drive: 'RWD · AWD',  tint: '#B3262F', img: 'img/ghibli.webp',
-                    desc: '마세라티 세단의 시작점. 매일 타는 세단의 실용성에 이탈리안 스포츠 세단의 감각을 더했습니다.' },
+                    desc: '마세라티 세단의 시작점<br>매일 타는 세단의 실용성에 이탈리안 스포츠 세단의 감각을 더했습니다' },
     quattroporte: { ko: '콰트로포르테', en: 'Quattroporte', body: '플래그십 세단',    engine: 'V6 · V8',         drive: 'RWD · AWD',  tint: '#2A5FA8', img: 'img/quattroporte.webp',
-                    desc: '이름 그대로 네 개의 문을 가진 플래그십. 여유로운 뒷좌석과 장거리의 안락함이 강점입니다.' },
+                    desc: '이름 그대로 네 개의 문을 가진 플래그십<br>여유로운 뒷좌석과 장거리의 안락함이 강점입니다' },
     granturismo:  { ko: '그란투리스모', en: 'GranTurismo',  body: '2도어 그랜드 투어러', engine: '네튜노 V6',     drive: 'AWD',        tint: '#B3262F', img: 'img/granturismo.webp',
-                    desc: '먼 길을 빠르고 편안하게. 네튜노 V6와 사륜구동을 품은 2도어 그랜드 투어러입니다.' },
+                    desc: '먼 길을 빠르고 편안하게<br>네튜노 V6와 사륜구동을 품은 2도어 그랜드 투어러입니다' },
     mc20:         { ko: 'MC20',         en: 'MC20',         body: '미드십 슈퍼 스포츠', engine: '네튜노 V6',     drive: 'MR',         tint: '#AEB7C6', img: 'img/mc20.webp',
-                    desc: '카본 모노코크와 버터플라이 도어, 630마력 네튜노 V6. 마세라티 기술의 정점에 선 슈퍼 스포츠카입니다.' }
+                    desc: '카본 모노코크와 버터플라이 도어, 630마력 네튜노 V6<br>마세라티 기술의 정점에 선 슈퍼 스포츠카입니다' }
   };
   const ORDER = ['grecale', 'levante', 'ghibli', 'quattroporte', 'granturismo', 'mc20'];
   const CHECKS = [
@@ -79,7 +80,7 @@
       const ta = document.createElement('textarea'); ta.value = text; ta.style.cssText = 'position:fixed;opacity:0';
       document.body.appendChild(ta); ta.select();
       let ok = false; try { ok = document.execCommand('copy'); } catch (_) {}
-      ta.remove(); toast(ok ? okMsg : '복사하지 못했습니다. 문구를 길게 눌러 복사해 주세요.');
+      ta.remove(); toast(ok ? okMsg : '복사하지 못했습니다 · 문구를 길게 눌러 복사해 주세요');
     }
   };
 
@@ -153,6 +154,7 @@
   function splitSay() {
     const out = [];
     sayText.childNodes.forEach(n => {
+      if (n.nodeName === 'BR') { out.push('<br>'); return; }
       const g = n.nodeType === 1 && n.hasAttribute('data-g');
       n.textContent.split(/(\s+)/).forEach(t => {
         if (!t) return;
@@ -317,7 +319,7 @@
     const list = CARS.filter(c => c.featured && c.status !== '판매완료');
     const show = list.length ? list : CARS.filter(c => c.status !== '판매완료').slice(0, 6);
     row.innerHTML = show.length ? show.map((c, i) => cardHTML(c, i)).join('')
-      : `<div class="empty" style="flex:1">${LOAD_ERR ? '매물을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.' : '새 인증 매물을 준비하고 있습니다. 상담을 남겨 주시면 입고 소식을 먼저 알려 드립니다.'}</div>`;
+      : `<div class="empty" style="flex:1">${LOAD_ERR ? '매물을 불러오지 못했습니다<br>잠시 후 다시 시도해 주세요' : '새 인증 매물을 준비하고 있습니다<br>상담을 남겨 주시면 입고 소식을 먼저 알려 드립니다'}</div>`;
     rowPaddles(row, $('#featPrev'), $('#featNext'));
   }
 
@@ -343,25 +345,56 @@
     const today = new Date(); today.setMinutes(today.getMinutes() - today.getTimezoneOffset());
     $('#fDate').min = today.toISOString().slice(0, 10);
 
-    $('#form').addEventListener('submit', e => {
-      e.preventDefault();
-      const f = e.target, name = f.name.value.trim(), telv = f.tel.value.trim();
-      if (!name) { toast('이름을 입력해 주세요.'); f.name.focus(); return; }
-      if (telv.replace(/\D/g, '').length < 9) { toast('연락처를 확인해 주세요.'); f.tel.focus(); return; }
-      const lines = ['[더원오토 마세라티 인증 중고차 상담 신청]', `이름: ${name}`, `연락처: ${telv}`];
-      if (f.model.value) lines.push(`관심 모델: ${f.model.value}`);
-      if (f.date.value) lines.push(`방문 희망일: ${f.date.value}`);
-      if (f.msg.value.trim()) lines.push(`문의: ${f.msg.value.trim()}`);
-      const text = lines.join('\n');
+    const formBtn = $('#formBtn');
+    const fallback = text => {   // 저장소가 없을 때: 문구를 만들어 복사하게 한다
       $('#formText').textContent = text;
       const acts = $('#formActs');
       acts.innerHTML = '<button type="button" class="btn btn-gold btn-sm" data-act="copy">문구 복사</button>'
         + (SITE.phone ? `<a class="btn btn-ghost btn-sm" href="sms:${esc(SITE.phone.replace(/[^0-9+]/g, ''))}?&body=${encodeURIComponent(text)}">문자로 보내기 (${esc(SITE.phone)})</a>` : '')
         + (SITE.kakao ? `<a class="btn btn-ghost btn-sm" href="${esc(SITE.kakao)}" target="_blank" rel="noopener">카카오톡 채널 열기</a>` : '');
-      acts.querySelector('[data-act=copy]').onclick = () => copy(text, '상담 문구를 복사했습니다.');
+      acts.querySelector('[data-act=copy]').onclick = () => copy(text, '상담 문구를 복사했습니다');
       $('#formResult').hidden = false;
       $('#formResult').scrollIntoView({ behavior: RM ? 'instant' : 'smooth', block: 'center' });
+    };
+    const notify = row => {      // 알림 메일 (실패해도 접수에는 영향 없음)
+      if (!SITE.notifyEmail) return;
+      fetch('https://formsubmit.co/ajax/' + encodeURIComponent(SITE.notifyEmail), {
+        method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify({
+          _subject: `[더원오토] 상담 신청 - ${row.name}${row.car_title ? ' / ' + row.car_title : row.model ? ' / ' + row.model : ''}`, _template: 'table', _captcha: 'false',
+          '이름': row.name, '연락처': row.phone, '관심 모델': row.model || '-', '문의 차량': row.car_title || '-', '방문 희망일': row.visit_date || '-', '문의 내용': row.message || '-',
+          '확인': new URL('admin.html', location.href).href
+        })
+      }).catch(() => {});
+    };
+    $('#form').addEventListener('submit', async e => {
+      e.preventDefault();
+      const f = e.target, name = f.name.value.trim(), telv = f.tel.value.trim();
+      if (f.website.value) return;   // 자동 입력 프로그램 차단
+      if (!name) { toast('이름을 입력해 주세요'); f.name.focus(); return; }
+      if (telv.replace(/\D/g, '').length < 9) { toast('연락처를 확인해 주세요'); f.tel.focus(); return; }
+      if (!f.agree.checked) { toast('개인정보 수집·이용에 동의해 주세요'); f.agree.focus(); return; }
+      const row = { name: name.slice(0, 40), phone: telv.slice(0, 30), model: f.model.value, visit_date: f.date.value || null,
+        message: f.msg.value.trim().slice(0, 2000), car_id: f.dataset.carId || '', car_title: f.dataset.carTitle || '' };
+      const lines = ['[더원오토 마세라티 인증 중고차 상담 신청]', `이름: ${row.name}`, `연락처: ${row.phone}`];
+      if (row.model) lines.push(`관심 모델: ${row.model}`);
+      if (row.visit_date) lines.push(`방문 희망일: ${row.visit_date}`);
+      if (row.message) lines.push(`문의: ${row.message}`);
+      if (!sb) return fallback(lines.join('\n'));
+      formBtn.disabled = true; formBtn.textContent = '접수 중';
+      try {
+        const { error } = await sb.from('inquiries').insert(row);
+        if (error) throw error;
+        notify(row);
+        f.reset(); delete f.dataset.carId; delete f.dataset.carTitle;
+        $('#formResult').hidden = true; $('#formDone').hidden = false; formBtn.hidden = true;
+        $('#formDone').scrollIntoView({ behavior: RM ? 'instant' : 'smooth', block: 'center' });
+      } catch (err) {
+        console.error('상담 접수 실패', err); toast('접수하지 못했습니다 · 아래 문구를 복사해 보내 주세요'); fallback(lines.join('\n'));
+      }
+      formBtn.disabled = false; formBtn.textContent = '상담 신청';
     });
+    $('#form').addEventListener('input', () => { if (!$('#formDone').hidden) { $('#formDone').hidden = true; formBtn.hidden = false; } });
 
     const biz = [SITE.name || '더원오토', SITE.ceo && `대표 ${SITE.ceo}`, SITE.bizNo && `사업자등록번호 ${SITE.bizNo}`, SITE.address, SITE.phone && `전화 ${SITE.phone}`].filter(Boolean);
     $('#footBiz').textContent = biz.join(' · ');
@@ -371,8 +404,9 @@
   function consult(car, kind) {
     const f = $('#form');
     f.model.value = MODELS[car.model]?.ko || '';
-    f.msg.value = `${title(car)} (${car.year}년식 · ${km(car.mileage)} · ${wonText(car.price)}) ${kind} 문의드립니다.`;
-    $('#formResult').hidden = true;
+    f.msg.value = `${title(car)} (${car.year}년식 · ${km(car.mileage)} · ${wonText(car.price)}) ${kind} 문의드립니다`;
+    f.dataset.carId = car.id; f.dataset.carTitle = `${title(car)} (${car.year}년식 · ${wonText(car.price)})`;
+    $('#formResult').hidden = true; $('#formDone').hidden = true; $('#formBtn').hidden = false;
     location.hash = '#contact';
   }
 
@@ -409,7 +443,7 @@
     list = list.sort((a, b) => (rank[a.status] - rank[b.status]) || sorters[listState.sort](a, b));
     $('#countLine').innerHTML = `${listState.model === 'all' ? '전체' : MODELS[listState.model].ko} <b>${list.length}대</b>`;
     $('#grid').innerHTML = list.length ? list.map((c, i) => cardHTML(c, i)).join('')
-      : `<div class="empty"><p>${LOAD_ERR ? '매물을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.' : '조건에 맞는 매물이 지금은 없습니다.'}</p><p style="margin-top:14px"><a class="btn btn-ghost btn-sm" href="#contact">입고 알림 상담하기</a></p></div>`;
+      : `<div class="empty"><p>${LOAD_ERR ? '매물을 불러오지 못했습니다<br>잠시 후 다시 시도해 주세요' : '조건에 맞는 매물이 지금은 없습니다'}</p><p style="margin-top:14px"><a class="btn btn-ghost btn-sm" href="#contact">입고 알림 상담하기</a></p></div>`;
   }
   $('#fStatus').addEventListener('change', e => { listState.status = e.target.value; drawGrid(); });
   $('#fSort').addEventListener('change', e => { listState.sort = e.target.value; drawGrid(); });
@@ -420,7 +454,7 @@
   function renderCar(id) {
     const c = CARS.find(x => x.id === id), el = PAGES.car;
     if (!c) {
-      el.innerHTML = `<section class="sub-hero" style="min-height:70vh"><div class="wrap"><p class="eyebrow">Not Found</p><h1>매물을 찾을 수 없습니다.</h1><p class="lead">판매가 끝났거나 주소가 바뀌었을 수 있습니다.</p><p><a class="btn btn-gold" href="#cars">전체 매물 보기</a></p></div></section>`;
+      el.innerHTML = `<section class="sub-hero" style="min-height:70vh"><div class="wrap"><p class="eyebrow">Not Found</p><h1>매물을 찾을 수 없습니다</h1><p class="lead">판매가 끝났거나 주소가 바뀌었을 수 있습니다</p><p><a class="btn btn-gold" href="#cars">전체 매물 보기</a></p></div></section>`;
       return;
     }
     const m = MODELS[c.model] || {}, sold = c.status === '판매완료';
@@ -461,7 +495,7 @@
 
     <section class="light">
       <div class="wrap d-sec">
-        <div class="sec-head"><p class="eyebrow rv">Details</p><h2 class="h2 rv" style="--d:1;font-size:clamp(28px,3.6vw,48px)">차량 정보와 점검 결과.</h2></div>
+        <div class="sec-head"><p class="eyebrow rv">Details</p><h2 class="h2 rv" style="--d:1;font-size:clamp(28px,3.6vw,48px)">차량 정보와 점검 결과</h2></div>
         <div class="d-cols">
           <dl class="spec-table rv">
             <div><dt>모델</dt><dd>마세라티 ${esc(title(c))}</dd></div>
@@ -482,11 +516,11 @@
         </div>
       </div>
       <div class="wrap d-sec" ${(c.options || []).length ? '' : 'hidden'}>
-        <div class="sec-head"><p class="eyebrow rv">Options</p><h2 class="h2 rv" style="--d:1;font-size:clamp(28px,3.6vw,48px)">주요 옵션.</h2></div>
+        <div class="sec-head"><p class="eyebrow rv">Options</p><h2 class="h2 rv" style="--d:1;font-size:clamp(28px,3.6vw,48px)">주요 옵션</h2></div>
         <ul class="opts rv">${(c.options || []).map(o => `<li>${ICON.check}${esc(o)}</li>`).join('')}</ul>
       </div>
       <div class="wrap d-sec">
-        <div class="sec-head"><p class="eyebrow rv">Finance</p><h2 class="h2 rv" style="--d:1;font-size:clamp(28px,3.6vw,48px)">월 납입금 미리 보기.</h2></div>
+        <div class="sec-head"><p class="eyebrow rv">Finance</p><h2 class="h2 rv" style="--d:1;font-size:clamp(28px,3.6vw,48px)">월 납입금 미리 보기</h2></div>
         <div class="calc rv" id="calc">
           <div>
             <div class="rng"><label for="cDown">선수금 <b id="cDownV"></b></label><input id="cDown" type="range" min="0" max="70" step="5" value="30"></div>
@@ -494,13 +528,13 @@
             <div class="rng"><label for="cRate">금리 (연) <b id="cRateV"></b></label><input id="cRate" type="range" min="3" max="12" step="0.1" value="6.9"></div>
           </div>
           <div class="calc-out"><small>예상 월 납입금</small><span class="num"><span id="cOut">0</span><em>만원</em></span>
-            <p>원리금 균등 상환 기준의 단순 계산입니다. 실제 금리와 한도는 금융사 심사 결과에 따라 달라집니다.</p></div>
+            <p>원리금 균등 상환 기준의 단순 계산입니다<br>실제 금리와 한도는 금융사 심사 결과에 따라 달라집니다</p></div>
         </div>
       </div>
     </section>
 
     <section class="feat">
-      <div class="wrap hl-top" style="margin-bottom:0"><div class="sec-head"><p class="eyebrow">More</p><h2 class="h2" style="font-size:clamp(28px,3.6vw,48px)">함께 볼 만한 매물.</h2></div>
+      <div class="wrap hl-top" style="margin-bottom:0"><div class="sec-head"><p class="eyebrow">More</p><h2 class="h2" style="font-size:clamp(28px,3.6vw,48px)">함께 볼 만한 매물</h2></div>
         <a class="link" href="#cars">전체 매물 보기 ${ICON.arrow}</a></div>
       <div class="rowscroll" id="simRow">${similar.map((x, i) => cardHTML(x, i)).join('')}</div>
       <div class="wrap paddles"><button class="round" id="simPrev" aria-label="이전 매물">${ICON.prev}</button><button class="round" id="simNext" aria-label="다음 매물">${ICON.next}</button></div>
@@ -556,7 +590,7 @@
     SAMPLE = false;
     try {
       await loadScript('vendor/supabase.js');
-      const sb = window.supabase.createClient(DB.url, DB.key, { auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false } });
+      sb = window.supabase.createClient(DB.url, DB.key, { auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false } });
       const { data, error } = await sb.from('cars').select('*').order('created_at', { ascending: false });
       if (error) throw error;
       CARS = (data || []).map(fromRow);

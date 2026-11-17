@@ -52,8 +52,13 @@
   const title = c => `${MODELS[c.model] || c.model} ${c.trim || ''}`.trim();
   const thumbOf = u => (u && u.includes(`/${BUCKET}/`)) ? u.replace(/(\.\w+)(\?.*)?$/, '_t$1') : u;
   const pathOf = u => { const k = `/object/public/${BUCKET}/`, i = (u || '').indexOf(k); return i < 0 ? null : decodeURIComponent(u.slice(i + k.length).split('?')[0]); };
-  const VIEWS = ['vSetup', 'vLogin', 'vList', 'vEdit'];
-  const show = id => { VIEWS.forEach(v => { $('#' + v).hidden = v !== id; }); window.scrollTo(0, 0); };
+  const VIEWS = ['vSetup', 'vLogin', 'vList', 'vInq', 'vEdit'];
+  const show = id => {
+    VIEWS.forEach(v => { $('#' + v).hidden = v !== id; });
+    $('#tabs').hidden = !(id === 'vList' || id === 'vInq');
+    $$('.tab').forEach(t => t.classList.toggle('on', t.dataset.tab === id));
+    window.scrollTo(0, 0);
+  };
 
   const toastEl = $('#toast'); let toastT;
   const toast = (msg, bad = false) => { toastEl.textContent = msg; toastEl.classList.toggle('bad', bad); toastEl.classList.add('on'); clearTimeout(toastT); toastT = setTimeout(() => toastEl.classList.remove('on'), bad ? 5200 : 2600); };
@@ -105,11 +110,18 @@
       async removeFiles(urls) {
         const paths = urls.flatMap(u => [pathOf(u), pathOf(thumbOf(u))]).filter(Boolean);
         if (paths.length) ok(await sb.storage.from(BUCKET).remove(paths));
-      }
+      },
+      async inqList() { return ok(await sb.from('inquiries').select('*').order('created_at', { ascending: false }).limit(500)); },
+      async inqSave(id, change) { return ok(await sb.from('inquiries').update(change).eq('id', id).select().single()); },
+      async inqRemove(id) { ok(await sb.from('inquiries').delete().eq('id', id)); }
     };
   }
   function demoApi() {
     let rows = (window.CARS || []).map((c, i) => ({ ...c, description: c.desc || '', created_at: new Date(Date.now() - i * 864e5).toISOString() }));
+    let inq = [
+      { id: 'd1', created_at: new Date(Date.now() - 36e5).toISOString(), name: '홍길동 (예시)', phone: '010-0000-0000', model: '그레칼레', visit_date: null, message: '이번 주말 시승이 가능한지 궁금합니다', car_id: '', car_title: '', status: '신규', memo: '' },
+      { id: 'd2', created_at: new Date(Date.now() - 26 * 36e5).toISOString(), name: '김예시', phone: '010-1111-2222', model: '르반떼', visit_date: null, message: '할부 조건 문의드립니다', car_id: 'levante-trofeo-2021-02', car_title: '르반떼 Trofeo (2021년식 · 1억 2,800만원)', status: '연락 완료', memo: '11/20 방문 예정' }
+    ];
     return {
       async init() {}, async session() { return null; }, async signIn() {}, async signOut() {}, async isAdmin() { return true; },
       async list() { return rows.map(r => ({ ...r })); },
@@ -119,7 +131,10 @@
       },
       async remove(id) { rows = rows.filter(r => r.id !== id); },
       async upload(path, blob) { return URL.createObjectURL(blob); },
-      async removeFiles() {}
+      async removeFiles() {},
+      async inqList() { return inq.map(r => ({ ...r })); },
+      async inqSave(id, change) { const r = inq.find(x => x.id === id); Object.assign(r, change); return { ...r }; },
+      async inqRemove(id) { inq = inq.filter(r => r.id !== id); }
     };
   }
 
@@ -214,6 +229,56 @@
     drawList();
   }
   ['input', 'change'].forEach(ev => { $('#q').addEventListener(ev, drawList); $('#fModel').addEventListener(ev, drawList); $('#fStat').addEventListener(ev, drawList); });
+
+  /* =====================================================
+     상담 신청
+     ===================================================== */
+  let inqs = [];
+  const fmtWhen = s => { const d = new Date(s), p = n => String(n).padStart(2, '0'); return `${d.getFullYear()}.${p(d.getMonth() + 1)}.${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`; };
+  async function refreshInq(quiet) {
+    try { inqs = await api.inqList(); } catch (err) { if (!quiet) toast(explain(err), true); inqs = []; }
+    drawInq();
+  }
+  function drawInq() {
+    const q = $('#inqQ').value.trim().toLowerCase(), fs = $('#inqStat').value;
+    const n = inqs.filter(r => r.status === '신규').length;
+    $('#inqBadge').textContent = n; $('#inqBadge').hidden = !n;
+    $('#inqTotal').textContent = inqs.length;
+    $('#inqLine').textContent = `신규 ${n} · 연락 완료 ${inqs.filter(r => r.status === '연락 완료').length} · 종료 ${inqs.filter(r => r.status === '종료').length}`;
+    const rows = inqs.filter(r => (!fs || r.status === fs) && (!q || `${r.name} ${r.phone} ${r.model} ${r.message} ${r.car_title} ${r.memo}`.toLowerCase().includes(q)));
+    $('#inqList').innerHTML = rows.length ? rows.map(r => `
+      <article class="inq ${r.status === '신규' ? 'new' : ''}" data-id="${esc(r.id)}">
+        <div class="inq-top">
+          <div><h3>${esc(r.name)} <a href="tel:${esc(String(r.phone).replace(/[^0-9+]/g, ''))}">${esc(r.phone)}</a><span class="tag ${r.status === '신규' ? 'hold' : r.status === '종료' ? 'sold' : ''}">${esc(r.status)}</span></h3><p class="when">${fmtWhen(r.created_at)} 접수</p></div>
+          <div class="acts"><select data-act="status" aria-label="처리 상태">${['신규', '연락 완료', '종료'].map(s => `<option ${s === r.status ? 'selected' : ''}>${s}</option>`).join('')}</select>
+          <button class="icon del" data-act="del" title="삭제" aria-label="삭제"><svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2.5 4h11M6 4V2.5h4V4m-6.5 0 .7 9.5h7.6l.7-9.5M6.5 6.5v4.5m3-4.5v4.5"/></svg></button></div>
+        </div>
+        <dl>
+          ${r.car_title ? `<dt>문의 차량</dt><dd>${r.car_id ? `<a href="index.html#car-${esc(r.car_id)}" target="_blank" rel="noopener" style="text-decoration:underline">${esc(r.car_title)}</a>` : esc(r.car_title)}</dd>` : ''}
+          ${r.model ? `<dt>관심 모델</dt><dd>${esc(r.model)}</dd>` : ''}
+          ${r.visit_date ? `<dt>방문 희망일</dt><dd>${esc(r.visit_date)}</dd>` : ''}
+          ${r.message ? `<dt>문의 내용</dt><dd>${esc(r.message)}</dd>` : ''}
+        </dl>
+        <input class="memo" data-act="memo" value="${esc(r.memo || '')}" placeholder="메모 (통화 내용, 방문 일정 등) — 입력 후 다른 곳을 누르면 저장" aria-label="메모">
+      </article>`).join('') : `<div class="empty"><b>${inqs.length ? '조건에 맞는 상담 신청이 없습니다.' : '아직 접수된 상담 신청이 없습니다.'}</b>${inqs.length ? '' : '고객이 사이트에서 상담을 신청하면 여기에 쌓입니다.'}</div>`;
+  }
+  $('#inqList').addEventListener('change', async e => {
+    const el = e.target.closest('[data-act]'); if (!el) return;
+    const r = inqs.find(x => x.id === el.closest('.inq').dataset.id); if (!r) return;
+    const change = el.dataset.act === 'status' ? { status: el.value } : el.dataset.act === 'memo' ? { memo: el.value.trim().slice(0, 500) } : null; if (!change) return;
+    try { Object.assign(r, await api.inqSave(r.id, change)); toast(change.status ? `"${change.status}"(으)로 바꿨습니다.` : '메모를 저장했습니다.'); }
+    catch (err) { toast(explain(err), true); }
+    drawInq();
+  });
+  $('#inqList').addEventListener('click', async e => {
+    const b = e.target.closest('button[data-act=del]'); if (!b) return;
+    const r = inqs.find(x => x.id === b.closest('.inq').dataset.id); if (!r) return;
+    if (!await confirmBox(`${r.name} 님의 상담 신청을 삭제할까요?`, '삭제하면 되돌릴 수 없습니다.')) return;
+    try { await api.inqRemove(r.id); inqs = inqs.filter(x => x.id !== r.id); drawInq(); toast('삭제했습니다.'); } catch (err) { toast(explain(err), true); }
+  });
+  ['input', 'change'].forEach(ev => { $('#inqQ').addEventListener(ev, drawInq); $('#inqStat').addEventListener(ev, drawInq); });
+  $('#inqReload').onclick = async () => { await refreshInq(); toast('새로 불러왔습니다.'); };
+  $('#tabs').addEventListener('click', e => { const t = e.target.closest('.tab'); if (!t) return; show(t.dataset.tab); if (t.dataset.tab === 'vInq') refreshInq(); });
 
   /* =====================================================
      등록 · 수정
@@ -360,7 +425,7 @@
         const el = $('#loginErr'); el.hidden = false; el.textContent = '이 계정은 관리자 목록에 없습니다. Supabase 의 admins 표에 이메일을 추가해 주세요.'; return;
       }
       $('#who').textContent = label; $('#who').hidden = false; $('#logout').hidden = state.demo;
-      await refresh(); show('vList');
+      await refresh(); show('vList'); refreshInq(true);
     } catch (err) { show(state.demo ? 'vSetup' : 'vLogin'); const el = $('#loginErr'); el.hidden = false; el.textContent = explain(err); }
   }
   $('#loginForm').addEventListener('submit', async e => {

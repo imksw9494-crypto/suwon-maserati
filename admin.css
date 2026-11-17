@@ -30,6 +30,23 @@ code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.9em;background
 .tbtn:hover{border-color:var(--gold);color:var(--gold-soft)}
 .demo-bar{background:#FBF1DA;color:#6B4E12;font-size:13.500px;padding:10px 24px;text-align:center;border-bottom:1px solid #EBD9A8}
 
+/* ---------- 탭 ---------- */
+.tabs{background:var(--navy-850);border-top:1px solid rgba(255,255,255,.1)}
+.tabs-in{max-width:1120px;margin:0 auto;padding:0 24px;display:flex;gap:6px}
+.tab{height:46px;padding:0 16px;color:rgba(245,242,234,.65);font-size:14.5px;font-weight:500;border-bottom:2px solid transparent;display:inline-flex;align-items:center;gap:8px}
+.tab.on{color:#fff;border-color:var(--gold)}
+.tab b{min-width:20px;height:20px;padding:0 6px;border-radius:999px;background:var(--gold);color:#12100A;font-size:12px;display:inline-grid;place-items:center}
+.inq{background:#fff;border:1px solid var(--line);border-radius:18px;padding:18px 20px;display:grid;gap:10px}
+.inq.new{border-color:var(--gold);box-shadow:0 0 0 3px rgba(200,168,110,.16)}
+.inq-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}
+.inq h3{font-size:17px;font-weight:700;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.inq h3 a{color:var(--gold-deep);font-weight:700}
+.inq .when{font-size:13px;color:var(--mute)}
+.inq dl{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;font-size:14.5px}
+.inq dt{color:var(--mute);white-space:nowrap}
+.inq dd{white-space:pre-wrap;word-break:break-word}
+.inq .memo{width:100%;height:40px;border:1px solid var(--line-2);border-radius:10px;padding:0 12px;font-size:14px;background:#FCFBF8}
+
 /* ---------- 공통 ---------- */
 .view{max-width:1120px;margin:0 auto;padding:36px 24px 60px;animation:in .5s var(--ease) both}
 .view.narrow{max-width:560px;padding-top:64px}
@@ -140,6 +157,7 @@ h1 span{color:var(--gold-deep)}
   .view{padding:26px 16px 50px}
   .top-in{padding:0 16px}
   .who{display:none}
+  .tabs-in{padding:0 16px}
   .brand span{display:none}
   .card{padding:20px 16px;border-radius:18px}
   .g3,.g4{grid-template-columns:1fr 1fr}

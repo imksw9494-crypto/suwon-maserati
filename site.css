@@ -328,6 +328,11 @@ ul{list-style:none}
 .field input:focus,.field select:focus,.field textarea:focus{outline:0;border-color:var(--gold);background:rgba(5,11,22,.8)}
 .field input::placeholder,.field textarea::placeholder{color:rgba(142,155,176,.6)}
 .field select option{color:#0B1626}
+.agree{display:flex;gap:10px;align-items:flex-start;font-size:14px;color:rgba(245,242,234,.86);cursor:pointer}
+.agree input{width:20px;height:20px;flex:none;margin-top:2px;accent-color:var(--gold)}
+.agree small{display:block;font-size:12px;color:var(--mute-d);margin-top:3px;line-height:1.55}
+.result.done p{font-size:15px;line-height:1.7}
+.result.done b{font-size:17px;color:var(--gold-soft)}
 .form-note{font-size:12.5px;color:var(--mute-d);line-height:1.6}
 .result{border:1px solid rgba(200,168,110,.4);border-radius:18px;padding:20px;background:rgba(200,168,110,.06);display:grid;gap:14px}
 .result pre{font:inherit;font-size:14.5px;white-space:pre-wrap;line-height:1.7;color:rgba(245,242,234,.9)}
