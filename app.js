@@ -267,6 +267,17 @@
   function initModels() {
     const S = window.STORIES || {}, box = $('#chapters'), navEl = $('#chNav');
     const br = t => esc(t).replace(/\n/g, '<br>');
+    const FUEL = { grecale: ['가솔린', '하이브리드', '전기'], levante: ['가솔린', '하이브리드'], ghibli: ['가솔린', '하이브리드'], quattroporte: ['가솔린'], granturismo: ['가솔린', '전기'], mc20: ['가솔린'] };
+    $('#lineup').innerHTML = ORDER.map((k, i) => `
+      <a class="lu rv" style="--d:${i % 3};--tint:${MODELS[k].tint}" href="#model-${k}">
+        <div class="lu-img"><img src="${MODELS[k].img}" alt="마세라티 ${MODELS[k].ko}" loading="lazy"></div>
+        <div class="lu-txt">
+          <p class="lu-badges">${FUEL[k].map(f => `<span>${f}</span>`).join('')}</p>
+          <h3>${MODELS[k].ko}</h3>
+          <p class="lu-desc">${MODELS[k].body} · ${esc((S[k] || {}).tagline || '')}</p>
+          <span class="lu-more">자세히 보기 ${ICON.arrow}</span>
+        </div>
+      </a>`).join('');
     navEl.innerHTML = ORDER.map(k => `<a href="#model-${k}" data-k="${k}">${MODELS[k].ko}</a>`).join('');
     box.innerHTML = ORDER.map((k, i) => {
       const m = MODELS[k], s = S[k]; if (!s) return '';
@@ -282,6 +293,10 @@
           </div>
         </header>
         <div class="ch-body">
+          <div class="ch-gal" data-gal>
+            <div class="ch-gal-track">${[[s.cover, '외관'], [s.inside[3], s.inside[0] === 'Engine' ? '엔진' : '실내'], [s.detail, '뒷모습'], ...s.heritage].map(([src, cap], x) => `<figure><img src="${src}" alt="${m.ko} ${esc(cap)}" loading="lazy"><figcaption>${esc(cap)}</figcaption></figure>`).join('')}</div>
+            <div class="ch-gal-bar"><span class="ch-gal-hint">옆으로 넘겨 보세요</span><span class="ch-gal-no num"><b>1</b> / ${3 + s.heritage.length}</span></div>
+          </div>
           <div class="wrap ch-intro">
             <p class="st-lead rv">${br(s.intro)}</p>
             <div class="stats">${s.stats.map(([v, u, l], x) => `<div class="stat rv" style="--d:${x}"><span class="num">${esc(v)}${u ? `<sup>${esc(u)}</sup>` : ''}</span><p>${esc(l)}</p></div>`).join('')}</div>
@@ -323,6 +338,14 @@
       links.forEach(l => { const on = l.dataset.k === e.target.dataset.k; l.classList.toggle('on', on); if (on) l.scrollIntoView({ block: 'nearest', inline: 'center' }); });
     }), { rootMargin: '-45% 0px -50% 0px' });
     $$('.ch', box).forEach(c => co.observe(c));
+    // 휴대폰용 사진 넘겨 보기 : 지금 몇 번째 사진인지 표시
+    $$('[data-gal]', box).forEach(g => {
+      const tr = $('.ch-gal-track', g), no = $('.ch-gal-no b', g), hint = $('.ch-gal-hint', g);
+      tr.addEventListener('scroll', () => {
+        const i = Math.round(tr.scrollLeft / Math.max(1, tr.firstElementChild.offsetWidth + 10)) + 1;
+        no.textContent = Math.min(tr.children.length, Math.max(1, i)); if (tr.scrollLeft > 20) hint.style.opacity = 0;
+      }, { passive: true });
+    });
     watch(box);
   }
 
