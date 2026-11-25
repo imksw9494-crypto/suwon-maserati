@@ -91,7 +91,7 @@
   /* =====================================================
      라우터 : #home · #cars · #cars-모델 · #car-아이디 · #섹션
      ===================================================== */
-  const PAGES = { home: $('#p-home'), cars: $('#p-cars'), car: $('#p-car'), model: $('#p-model') };
+  const PAGES = { home: $('#p-home'), cars: $('#p-cars'), car: $('#p-car') };
   const SECTIONS = ['highlights', 'models', 'program', 'inspection', 'featured', 'process', 'faq', 'contact'];
   let current = null;
   const nav = $('#nav'), drawer = $('#drawer'), burger = $('#burger');
@@ -101,27 +101,25 @@
     let page = 'home', arg = null, sec = null;
     if (h === 'cars' || h.startsWith('cars-')) { page = 'cars'; arg = h.slice(5) || 'all'; }
     else if (h.startsWith('car-')) { page = 'car'; arg = h.slice(4); }
-    else if (h.startsWith('model-')) { page = 'model'; arg = h.slice(6); }
+    else if (h.startsWith('model-') && MODELS[h.slice(6)]) sec = 'm-' + h.slice(6);
     else if (SECTIONS.includes(h)) sec = h;
 
     closeDrawer();
-    const changed = current !== page || page === 'car' || page === 'model';
+    const changed = current !== page || page === 'car';
     if (changed) {
       Object.entries(PAGES).forEach(([k, el]) => { el.hidden = k !== page; });
       const el = PAGES[page]; el.style.animation = 'none'; void el.offsetWidth; el.style.animation = '';
     }
     if (page === 'cars') renderCars(arg);
     if (page === 'car') renderCar(arg);
-    if (page === 'model') renderModel(arg);
     current = page;
 
     $$('.menu a').forEach(a => {
       const k = a.getAttribute('href').slice(1);
-      a.classList.toggle('on', ((page === 'cars' || page === 'car') && k === 'cars') || (page === 'model' && k === 'models') || (page === 'home' && k === sec));
+      a.classList.toggle('on', ((page === 'cars' || page === 'car') && k === 'cars') || (page === 'home' && (k === sec || (k === 'models' && String(sec).startsWith('m-')))));
     });
     $('#bar').style.display = '';
     document.title = page === 'cars' ? '매물 | 수원 마세라티 인증중고차'
-      : page === 'model' ? `${MODELS[arg]?.ko || '모델'} 이야기 | 수원 마세라티 인증중고차`
       : page === 'car' ? `${$('#p-car h1')?.dataset.t || '매물'} | 수원 마세라티 인증중고차`
       : '수원 마세라티 인증중고차';
 
@@ -267,33 +265,65 @@
      모델 뷰어
      ===================================================== */
   function initModels() {
-    const list = $('#mvList'), carBox = $('#mvCar'), stage = $('#mvStage');
-    const count = k => CARS.filter(c => c.model === k && c.status !== '판매완료').length;
-    list.innerHTML = ORDER.map(k => {
-      const m = MODELS[k];
-      return `<div class="mv-item" data-k="${k}">
-        <button class="mv-btn" role="tab"><span class="plus">${ICON.plus}</span>${m.ko}<small>${m.body}</small></button>
-        <div class="mv-more"><div><p>${m.desc}</p><a class="link" href="#model-${k}">${m.ko} 이야기 보기 ${ICON.arrow}</a></div></div>
-      </div>`;
+    const S = window.STORIES || {}, box = $('#chapters'), navEl = $('#chNav');
+    const br = t => esc(t).replace(/\n/g, '<br>');
+    navEl.innerHTML = ORDER.map(k => `<a href="#model-${k}" data-k="${k}">${MODELS[k].ko}</a>`).join('');
+    box.innerHTML = ORDER.map((k, i) => {
+      const m = MODELS[k], s = S[k]; if (!s) return '';
+      return `
+      <article class="ch" id="m-${k}" data-k="${k}" style="--tint:${m.tint}">
+        <header class="ch-cover">
+          <img src="${s.cover}" alt="마세라티 ${m.ko}" loading="lazy">
+          <div class="ch-cover-txt wrap">
+            <span class="ch-no num">${String(i + 1).padStart(2, '0')} <i>/ 06</i></span>
+            <p class="eyebrow">Maserati ${m.en}</p>
+            <h2>${m.ko}</h2>
+            <p class="st-tag">${esc(s.tagline)}</p>
+          </div>
+        </header>
+        <div class="ch-body">
+          <div class="wrap ch-intro">
+            <p class="st-lead rv">${br(s.intro)}</p>
+            <div class="stats">${s.stats.map(([v, u, l], x) => `<div class="stat rv" style="--d:${x}"><span class="num">${esc(v)}${u ? `<sup>${esc(u)}</sup>` : ''}</span><p>${esc(l)}</p></div>`).join('')}</div>
+          </div>
+          <div class="wrap ch-split">
+            <figure class="rv"><img src="${s.inside[3]}" alt="${m.ko} ${s.inside[0] === 'Engine' ? '엔진' : '실내'}" loading="lazy"></figure>
+            <div class="rv" style="--d:1">
+              <p class="eyebrow">${s.inside[0]}</p>
+              <h3 class="h2">${esc(s.inside[1])}</h3>
+              <p class="ch-p">${br(s.inside[2])}</p>
+              <blockquote><b>이름의 유래 · ${esc(s.name.title)}</b>${br(s.name.text)}</blockquote>
+            </div>
+          </div>
+          <div class="wrap ch-split rev">
+            <figure class="rv"><img src="${s.detail}" alt="${m.ko} 뒷모습" loading="lazy"></figure>
+            <div class="rv" style="--d:1">
+              <p class="eyebrow">Character</p>
+              <h3 class="h2">${m.ko}를 ${m.ko}답게</h3>
+              <ol class="ch-feat">${s.features.map(([t, d], x) => `<li><span class="num">${String(x + 1).padStart(2, '0')}</span><div><b>${esc(t)}</b><p>${br(d)}</p></div></li>`).join('')}</ol>
+            </div>
+          </div>
+          <div class="wrap ch-hist">
+            <p class="eyebrow rv">History</p>
+            <h3 class="h2 rv" style="--d:1">${m.ko}가 걸어온 길</h3>
+            ${s.heritage.length ? `<div class="ch-old n${s.heritage.length} rv">${s.heritage.map(([src, cap]) => `<figure><img src="${src}" alt="${esc(cap)}" loading="lazy"><figcaption>${esc(cap)}</figcaption></figure>`).join('')}</div>` : ''}
+            <ol class="ch-tl">${s.timeline.map(([y, t, d], x) => `<li class="rv" style="--d:${x}"><span class="num">${esc(y)}</span><b>${esc(t)}</b><p>${br(d)}</p></li>`).join('')}</ol>
+          </div>
+          <div class="wrap ch-cta rv">
+            <div><h3>이런 분께 어울립니다</h3><ul>${s.fit.map(f => `<li>${ICON.check}${esc(f)}</li>`).join('')}</ul></div>
+            <div class="ch-btns"><a class="btn btn-gold" href="#cars-${k}">${m.ko} 인증 매물 보기</a><a class="btn btn-ghost" href="#contact">상담 예약</a></div>
+          </div>
+        </div>
+      </article>`;
     }).join('');
-    carBox.innerHTML = ORDER.map(k => `<img data-k="${k}" src="${MODELS[k].img}" alt="마세라티 ${MODELS[k].ko}" loading="lazy">`).join('');
-    let cur = null;
-    const select = k => {
-      if (k === cur) return; const m = MODELS[k];
-      $$('.mv-item', list).forEach(el => { const on = el.dataset.k === k; el.classList.toggle('on', on); $('.mv-btn', el).setAttribute('aria-selected', String(on)); });
-      $$('img', carBox).forEach(img => {
-        const on = img.dataset.k === k, was = img.classList.contains('on');
-        img.classList.toggle('out', was && !on); img.classList.toggle('on', on);
-        if (was && !on) setTimeout(() => img.classList.remove('out'), 700);
-      });
-      $('#mvName').innerHTML = `<span>${m.en}</span>`;
-      $('#mvBody').textContent = m.body; $('#mvEngine').textContent = m.engine; $('#mvDrive').textContent = m.drive;
-      $('#mvGo').href = `#model-${k}`; stage.style.setProperty('--tint', m.tint);
-      $('#mvDescM').innerHTML = `<p>${m.desc}</p><a class="link" href="#model-${k}">${m.ko} 이야기 보기 ${ICON.arrow}</a>`;
-      cur = k;
-    };
-    list.addEventListener('click', e => { const it = e.target.closest('.mv-item'); if (it && e.target.closest('.mv-btn')) select(it.dataset.k); });
-    select('quattroporte');
+    // 지금 보고 있는 모델을 위쪽 바로가기에 표시
+    const links = $$('a', navEl);
+    const co = new IntersectionObserver(es => es.forEach(e => {
+      if (!e.isIntersecting) return;
+      links.forEach(l => { const on = l.dataset.k === e.target.dataset.k; l.classList.toggle('on', on); if (on) l.scrollIntoView({ block: 'nearest', inline: 'center' }); });
+    }), { rootMargin: '-45% 0px -50% 0px' });
+    $$('.ch', box).forEach(c => co.observe(c));
+    watch(box);
   }
 
   /* ---------- 인증 프로그램 스크롤 스토리 ---------- */
@@ -578,64 +608,6 @@
   }
 
   /* =====================================================
-     모델 이야기 (#model-모델이름)
-     ===================================================== */
-  function renderModel(k) {
-    const m = MODELS[k], s = (window.STORIES || {})[k], el = PAGES.model;
-    if (!m || !s) { el.innerHTML = `<section class="sub-hero" style="min-height:70vh"><div class="wrap"><p class="eyebrow">Not Found</p><h1>모델을 찾을 수 없습니다</h1><p><a class="btn btn-gold" href="#models">모델 전체 보기</a></p></div></section>`; return; }
-    const br = t => esc(t).replace(/\n/g, '<br>');
-    const n = CARS.filter(c => c.model === k && c.status !== '판매완료').length;
-    const i = ORDER.indexOf(k), prev = ORDER[(i + ORDER.length - 1) % ORDER.length], next = ORDER[(i + 1) % ORDER.length];
-    const mine = CARS.filter(c => c.model === k && c.status !== '판매완료').slice(0, 6);
-    el.innerHTML = `
-    <section class="st-hero" style="--tint:${m.tint}">
-      <div class="st-name" aria-hidden="true">${m.en}</div>
-      <div class="wrap st-hero-in">
-        <nav class="crumb" aria-label="현재 위치"><a href="#home">홈</a>${ICON.arrow}<a href="#models">모델</a>${ICON.arrow}<span>${m.ko}</span></nav>
-        <p class="eyebrow">Maserati ${m.en}</p>
-        <h1>${m.ko}</h1>
-        <p class="st-tag">${esc(s.tagline)}</p>
-        <div class="hero-cta" style="opacity:1;transform:none"><a class="btn btn-gold" href="#cars-${k}">${m.ko} 인증 매물 ${n ? n + '대 ' : ''}보기</a><a class="btn btn-ghost" href="#contact">상담 예약</a></div>
-      </div>
-      <div class="st-car"><img src="${m.img}" alt="마세라티 ${m.ko}"></div>
-      <ul class="st-chips wrap"><li><b>Body</b>${m.body}</li><li><b>Engine</b>${m.engine}</li><li><b>Drive</b>${m.drive}</li></ul>
-    </section>
-
-    <section class="st-intro"><div class="wrap"><p class="st-lead rv">${br(s.intro)}</p>
-      <div class="stats">${s.stats.map(([v, u, l], x) => `<div class="stat rv" style="--d:${x}"><span class="num">${esc(v)}${u ? `<sup>${esc(u)}</sup>` : ''}</span><p>${esc(l)}</p></div>`).join('')}</div>
-    </div></section>
-
-    <section class="st-origin light"><div class="wrap st-origin-in">
-      <div class="rv"><p class="eyebrow">이름의 유래</p><h2 class="h2">${esc(s.name.title)}</h2></div>
-      <p class="st-quote rv" style="--d:1">${br(s.name.text)}</p>
-    </div></section>
-
-    <section class="st-time"><div class="wrap">
-      <div class="sec-head"><p class="eyebrow rv">History</p><h2 class="h2 rv" style="--d:1">${m.ko}가 걸어온 길</h2></div>
-      <ol class="tl">${s.timeline.map(([y, t, d]) => `<li class="rv"><span class="tl-y num">${esc(y)}</span><div><h3>${esc(t)}</h3><p>${br(d)}</p></div></li>`).join('')}</ol>
-    </div></section>
-
-    <section class="st-feat light"><div class="wrap">
-      <div class="sec-head center"><p class="eyebrow rv">Character</p><h2 class="h2 rv" style="--d:1">${m.ko}를 ${m.ko}답게 만드는 것</h2></div>
-      <div class="st-grid">${s.features.map(([t, d], x) => `<article class="tile rv" style="--d:${x % 2}"><span class="num st-no">${String(x + 1).padStart(2, '0')}</span><div><h3>${esc(t)}</h3><p>${br(d)}</p></div></article>`).join('')}</div>
-      <div class="st-fit rv"><h3>이런 분께 어울립니다</h3><ul>${s.fit.map(f => `<li>${ICON.check}${esc(f)}</li>`).join('')}</ul></div>
-    </div></section>
-
-    <section class="feat">
-      <div class="wrap hl-top" style="margin-bottom:0"><div class="sec-head"><p class="eyebrow">Inventory</p><h2 class="h2" style="font-size:clamp(28px,3.6vw,48px)">지금 만날 수 있는 ${m.ko}</h2></div>
-        <a class="link" href="#cars-${k}">${m.ko} 매물 전체 보기 ${ICON.arrow}</a></div>
-      <div class="rowscroll" id="stRow">${mine.length ? mine.map((c, x) => cardHTML(c, x)).join('') : `<div class="empty" style="flex:1">지금은 등록된 ${m.ko} 매물이 없습니다<br>상담을 남겨 주시면 입고 소식을 먼저 알려 드립니다<p style="margin-top:16px"><a class="btn btn-ghost btn-sm" href="#contact">입고 알림 상담하기</a></p></div>`}</div>
-      <div class="wrap paddles"><button class="round" id="stPrev" aria-label="이전 매물">${ICON.prev}</button><button class="round" id="stNext" aria-label="다음 매물">${ICON.next}</button></div>
-      <div class="wrap st-nav">
-        <a href="#model-${prev}"><small>이전 모델</small><b>${MODELS[prev].ko}</b></a>
-        <a href="#model-${next}" style="text-align:right"><small>다음 모델</small><b>${MODELS[next].ko}</b></a>
-      </div>
-    </section>`;
-    rowPaddles($('#stRow'), $('#stPrev'), $('#stNext'));
-    requestAnimationFrame(() => requestAnimationFrame(() => $('.st-hero', el)?.classList.add('ready')));
-  }
-
-  /* =====================================================
      매물 불러오기 : 저장소가 연결돼 있으면 거기서, 아니면 예시 데이터
      ===================================================== */
   const fromRow = r => ({
@@ -660,7 +632,7 @@
 
   /* ---------- 시작 ---------- */
   // 매물 페이지 주소로 바로 들어온 경우, 불러오는 동안 메인이 잠깐 비치지 않게 한다
-  if (/^#(cars?|model)(-|$)/.test(location.hash)) { PAGES.home.hidden = true; nav.classList.add('solid'); }
+  if (/^#cars?(-|$)/.test(location.hash)) { PAGES.home.hidden = true; nav.classList.add('solid'); }
   splitSay(); initHero(); initHighlights(); initCounts(); initStory(); initAcc(); initContact(); initCredits();
   // 저장소 응답이 늦거나 멈춰도 화면은 뜨게 한다 (6초 넘으면 매물 없이 먼저 표시)
   let started = false;

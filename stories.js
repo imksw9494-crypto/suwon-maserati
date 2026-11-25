@@ -123,3 +123,16 @@ window.STORIES = {
     fit: ['일생에 한 번은 슈퍼카를 소유하고 싶은 분', '희소성과 소장 가치를 함께 보는 분', '서킷과 도로를 모두 즐기려는 분']
   }
 };
+
+/* 사진과 실내 소개 (img/m-모델-역할.webp) */
+(function () {
+  var add = {
+    grecale: { inside: ['Interior', '화면이 중심이 된 실내', '12.3인치 중앙 화면 아래로 공조와 편의 기능을 다루는 두 번째 화면이 이어집니다\n가죽으로 감싼 대시보드와 넉넉한 뒷좌석이 매일 타는 차의 편안함을 완성합니다', 'img/m-grecale-interior.webp'], heritage: [] },
+    levante: { inside: ['Interior', '가죽으로 감싼 넉넉한 공간', '손이 닿는 곳마다 가죽이 둘러져 있고 높은 시트 포지션이 탁 트인 시야를 줍니다\n넓은 뒷좌석과 적재 공간은 가족 여행에도 여유롭습니다', 'img/m-levante-interior.webp'], heritage: [] },
+    ghibli: { inside: ['Interior', '운전자를 향한 실내', '낮은 시트와 두툼한 스티어링 휠, 대시보드 가운데의 아날로그 시계가 스포츠 세단의 분위기를 만듭니다\n가죽과 스티치의 조합은 차마다 다른 개성을 보여 줍니다', 'img/m-ghibli-interior.webp'], heritage: [['img/m-ghibli-h1.webp', '2세대 기블리 · 1990년대']] },
+    quattroporte: { inside: ['Interior', '이동이 휴식이 되는 실내', '넓게 펼쳐진 대시보드와 원목 장식, 가죽 시트가 플래그십의 격을 보여 줍니다\n뒷좌석은 다리를 뻗고 쉴 수 있을 만큼 여유롭습니다', 'img/m-quattroporte-interior.webp'], heritage: [['img/m-quattroporte-h1.webp', '초대 콰트로포르테 · 1960년대'], ['img/m-quattroporte-h2.webp', '5세대 콰트로포르테 · 2000년대']] },
+    granturismo: { inside: ['Interior', '네 명을 위한 그랜드 투어러', '디지털 계기판과 중앙 화면이 운전자를 감싸고 시트는 장거리에서도 몸을 단단히 받쳐 줍니다\n뒷좌석에도 성인이 앉을 수 있습니다', 'img/m-granturismo-interior.webp'], heritage: [['img/m-granturismo-h1.webp', 'A6 1500 · 1940년대'], ['img/m-granturismo-h2.webp', '3500 GT · 1960년대'], ['img/m-granturismo-h3.webp', '1세대 그란투리스모 · 2007']] },
+    mc20: { inside: ['Engine', '모데나에서 만든 심장', '네튜노 V6는 마세라티가 20여 년 만에 직접 설계한 엔진입니다\nF1에서 온 프리챔버 연소 기술로 3.0리터 배기량에서 630마력을 냅니다', 'img/detail-engine.webp'], heritage: [['img/m-mc20-h1.webp', 'MC12 · 2004']] }
+  };
+  Object.keys(add).forEach(function (k) { Object.assign(window.STORIES[k], add[k], { cover: 'img/m-' + k + '-cover.webp', detail: 'img/m-' + k + '-detail.webp' }); });
+})();

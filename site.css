@@ -454,6 +454,62 @@ input[type=range]::-moz-range-thumb{width:14px;height:14px;border-radius:50%;bac
 .calc-out p{font-size:12.5px;color:var(--mute-d);line-height:1.6;margin-top:10px}
 
 /* =========================================================
+   MODEL CHAPTERS (메인에서 스크롤로 이어지는 차종 이야기)
+   ========================================================= */
+.models{padding-bottom:0}
+.models>.wrap{padding-bottom:clamp(40px,5vw,70px)}
+.ch-nav{position:sticky;top:var(--nav-h);z-index:30;display:flex;justify-content:center;gap:6px;padding:10px 16px;background:rgba(5,11,22,.86);-webkit-backdrop-filter:saturate(180%) blur(18px);backdrop-filter:saturate(180%) blur(18px);border-bottom:1px solid var(--line-d);overflow-x:auto;scrollbar-width:none}
+.ch-nav::-webkit-scrollbar{display:none}
+.ch-nav a{flex:none;height:36px;padding:0 16px;border-radius:999px;display:inline-flex;align-items:center;font-size:14px;color:rgba(245,242,234,.7);transition:background .3s,color .3s}
+.ch-nav a:hover{color:#fff}
+.ch-nav a.on{background:var(--ivory);color:var(--ink)}
+.ch{position:relative;background:var(--navy-950);color:var(--ivory)}
+.ch-cover{position:sticky;top:0;height:100vh;height:100svh;min-height:560px;overflow:hidden;display:flex;align-items:flex-end}
+.ch-cover img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:saturate(.9) contrast(1.05) brightness(.82)}
+.ch-cover::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(5,11,22,.55) 0%,rgba(5,11,22,.05) 34%,rgba(5,11,22,.2) 55%,rgba(5,11,22,.92) 100%)}
+.ch-cover-txt{position:relative;z-index:2;padding-bottom:clamp(48px,9vh,110px)}
+.ch-no{font-size:clamp(18px,1.6vw,24px);color:var(--gold-soft);display:block;margin-bottom:14px}
+.ch-no i{font-style:normal;color:rgba(245,242,234,.45)}
+.ch-cover h2{font-size:clamp(52px,10vw,150px);font-weight:700;letter-spacing:-.055em;line-height:1;margin-top:10px;text-shadow:0 4px 40px rgba(0,0,0,.4)}
+.ch-cover .st-tag{margin-top:14px}
+.ch-body{position:relative;z-index:2;background:linear-gradient(180deg,var(--navy-900),var(--navy-950));border-radius:28px 28px 0 0;margin-top:-28px;box-shadow:0 -30px 60px rgba(0,0,0,.45)}
+.ch-intro{padding:clamp(70px,9vw,130px) 0 clamp(50px,7vw,90px)}
+.ch-split{display:grid;grid-template-columns:1.15fr 1fr;gap:clamp(28px,5vw,80px);align-items:center;padding:clamp(40px,6vw,90px) 0}
+.ch-split.rev figure{order:2}
+.ch figure{border-radius:var(--r-lg);overflow:hidden;background:var(--navy-800)}
+.ch figure img{width:100%;height:100%;object-fit:cover;filter:saturate(.92) contrast(1.04);transition:transform 1.6s var(--ease-out)}
+.ch-split figure{aspect-ratio:4/3}
+.ch figure:hover img{transform:scale(1.04)}
+.ch-split .h2{font-size:clamp(28px,3.4vw,46px);margin-top:14px}
+.ch-p{margin-top:18px;color:var(--mute-d);font-size:clamp(16px,1.3vw,18.5px);line-height:1.8}
+.ch blockquote{margin-top:28px;padding:20px 24px;border-left:2px solid var(--gold);background:rgba(255,255,255,.04);border-radius:0 16px 16px 0;font-size:15.5px;line-height:1.75;color:rgba(245,242,234,.82)}
+.ch blockquote b{display:block;color:var(--gold-soft);font-weight:500;margin-bottom:6px}
+.ch-feat{list-style:none;margin-top:22px;display:grid;gap:0}
+.ch-feat li{display:grid;grid-template-columns:44px 1fr;gap:6px;padding:18px 0;border-top:1px solid var(--line-d)}
+.ch-feat .num{font-size:22px;color:var(--gold);line-height:1.3}
+.ch-feat b{font-size:17.5px;font-weight:700;letter-spacing:-.02em}
+.ch-feat p{margin-top:4px;font-size:15px;color:var(--mute-d);line-height:1.65}
+.ch-hist{padding:clamp(40px,6vw,90px) 0}
+.ch-hist .h2{font-size:clamp(28px,3.4vw,46px);margin-top:14px}
+.ch-old{display:grid;gap:14px;margin-top:clamp(26px,3.6vw,44px)}
+.ch-old.n1{grid-template-columns:1fr;max-width:760px}.ch-old.n2{grid-template-columns:1fr 1fr}.ch-old.n3{grid-template-columns:repeat(3,1fr)}
+.ch-old figure{position:relative;aspect-ratio:16/10}
+.ch-old img{filter:grayscale(.55) contrast(1.05) brightness(.9)!important}
+.ch-old figcaption{position:absolute;left:0;right:0;bottom:0;padding:26px 18px 14px;font-size:13.5px;letter-spacing:.04em;background:linear-gradient(transparent,rgba(5,11,22,.85))}
+.ch-tl{list-style:none;display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin-top:clamp(30px,4vw,54px);border-top:1px solid var(--gold)}
+.ch-tl li{padding:22px 22px 0 0;position:relative}
+.ch-tl li::before{content:"";position:absolute;left:0;top:-6px;width:11px;height:11px;border-radius:50%;background:var(--navy-950);border:2px solid var(--gold)}
+.ch-tl .num{display:block;font-size:clamp(30px,3.4vw,46px);line-height:1;color:var(--gold-soft)}
+.ch-tl b{display:block;margin-top:12px;font-size:17.5px;font-weight:700;letter-spacing:-.02em}
+.ch-tl p{margin-top:6px;font-size:14.5px;color:var(--mute-d);line-height:1.65}
+.ch-cta{display:grid;grid-template-columns:1fr auto;gap:30px;align-items:center;padding:clamp(30px,4vw,50px) clamp(24px,3.4vw,48px);margin-bottom:clamp(60px,8vw,110px);border-radius:var(--r-lg);background:radial-gradient(60% 120% at 100% 0%,color-mix(in srgb,var(--tint) 30%,transparent),transparent 70%),rgba(255,255,255,.05);border:1px solid var(--line-d)}
+.ch-cta h3{font-size:clamp(20px,2vw,26px);font-weight:700;letter-spacing:-.03em}
+.ch-cta ul{display:grid;gap:8px;margin-top:14px}
+.ch-cta li{display:flex;gap:10px;align-items:center;font-size:15.5px;color:rgba(245,242,234,.88)}
+.ch-cta li svg{color:var(--gold);flex:none}
+.ch-btns{display:grid;gap:10px}
+
+/* =========================================================
    MODEL STORY
    ========================================================= */
 .st-hero{position:relative;background:radial-gradient(60% 46% at 50% 78%,color-mix(in srgb,var(--tint,#24406B) 42%,transparent),transparent 72%),linear-gradient(180deg,#070E1B,#081223 60%,#050B16);padding:calc(var(--nav-h) + 26px) 0 0;overflow:hidden;min-height:100svh;display:flex;flex-direction:column}
@@ -560,7 +616,14 @@ input[type=range]::-moz-range-thumb{width:14px;height:14px;border-radius:50%;bac
   .s4{display:grid;grid-template-columns:55px 1fr;gap:4px 20px;padding-right:0}
   .s4 .dot{font-variant-numeric:lining-nums;grid-row:span 2}
   .s4 h3{margin-top:4px}
-  .faq,.contact-grid,.d-cols,.calc,.st-origin-in,.st-grid,.st-fit{grid-template-columns:1fr}
+  .faq,.contact-grid,.d-cols,.calc,.st-origin-in,.st-grid,.st-fit,.ch-split,.ch-cta{grid-template-columns:1fr}
+  .ch-split.rev figure{order:0}
+  .ch-nav{justify-content:flex-start}
+  .ch-old.n2,.ch-old.n3{grid-template-columns:1fr}
+  .ch-tl{grid-template-columns:1fr;border-top:0;border-left:1px solid var(--gold);margin-left:5px}
+  .ch-tl li{padding:0 0 26px 24px}
+  .ch-tl li::before{left:-6px;top:6px}
+  .ch-btns .btn{width:100%}
   .st-car img{max-width:118vw;max-height:none;width:118vw}
   .st-name{bottom:30%;font-size:24vw}
   .st-chips{padding-bottom:96px}
