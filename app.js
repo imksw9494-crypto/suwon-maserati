@@ -287,8 +287,8 @@
           <img src="${s.cover}" alt="마세라티 ${m.ko}" loading="lazy">
           <div class="ch-cover-txt wrap">
             <span class="ch-no num">${String(i + 1).padStart(2, '0')} <i>/ 06</i></span>
-            <p class="eyebrow">Maserati ${m.en}</p>
-            <h2>${m.ko}</h2>
+            <p class="eyebrow">마세라티 ${m.ko}</p>
+            <h2>${m.en}</h2>
             <p class="st-tag">${esc(s.tagline)}</p>
           </div>
         </header>
@@ -304,7 +304,7 @@
           <div class="wrap ch-split">
             <figure class="rv"><img src="${s.inside[3]}" alt="${m.ko} ${s.inside[0] === 'Engine' ? '엔진' : '실내'}" loading="lazy"></figure>
             <div class="rv" style="--d:1">
-              <p class="eyebrow">${s.inside[0]}</p>
+              <p class="eyebrow en-h">${s.inside[0]}</p>
               <h3 class="h2">${esc(s.inside[1])}</h3>
               <p class="ch-p">${br(s.inside[2])}</p>
               <blockquote><b>이름의 유래 · ${esc(s.name.title)}</b>${br(s.name.text)}</blockquote>
@@ -313,13 +313,13 @@
           <div class="wrap ch-split rev">
             <figure class="rv"><img src="${s.detail}" alt="${m.ko} 뒷모습" loading="lazy"></figure>
             <div class="rv" style="--d:1">
-              <p class="eyebrow">Character</p>
+              <p class="eyebrow en-h">Character</p>
               <h3 class="h2">${m.ko}를 ${m.ko}답게</h3>
               <ol class="ch-feat">${s.features.map(([t, d], x) => `<li><span class="num">${String(x + 1).padStart(2, '0')}</span><div><b>${esc(t)}</b><p>${br(d)}</p></div></li>`).join('')}</ol>
             </div>
           </div>
           <div class="wrap ch-hist">
-            <p class="eyebrow rv">History</p>
+            <p class="eyebrow en-h rv">History</p>
             <h3 class="h2 rv" style="--d:1">${m.ko}가 걸어온 길</h3>
             ${s.heritage.length ? `<div class="ch-old n${s.heritage.length} rv">${s.heritage.map(([src, cap]) => `<figure><img src="${src}" alt="${esc(cap)}" loading="lazy"><figcaption>${esc(cap)}</figcaption></figure>`).join('')}</div>` : ''}
             <ol class="ch-tl">${s.timeline.map(([y, t, d], x) => `<li class="rv" style="--d:${x}"><span class="num">${esc(y)}</span><b>${esc(t)}</b><p>${br(d)}</p></li>`).join('')}</ol>
@@ -551,7 +551,7 @@
 
     <section class="light">
       <div class="wrap d-sec">
-        <div class="sec-head"><p class="eyebrow rv">Details</p><h2 class="h2 rv" style="--d:1;font-size:clamp(28px,3.6vw,48px)">차량 정보와 점검 결과</h2></div>
+        <div class="sec-head"><p class="eyebrow en-h rv">Details</p><h2 class="h2 rv" style="--d:1;font-size:clamp(28px,3.6vw,48px)">차량 정보와 점검 결과</h2></div>
         <div class="d-cols">
           <dl class="spec-table rv">
             <div><dt>모델</dt><dd>마세라티 ${esc(title(c))}</dd></div>
@@ -567,16 +567,16 @@
             <div><dt>정비 이력</dt><dd>${esc(c.history?.service || '상담 시 안내')}</dd></div>
           </dl>
           <div class="checks rv" style="--d:1">
-            ${CHECKS.map(([name, d]) => `<div class="check"><span class="ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.500" stroke-linecap="round" stroke-linejoin="round"><path d="${d}"/></svg></span>${name}<span class="ok">${ICON.check}점검 완료</span></div>`).join('')}
+            ${CHECKS.map(([name, d]) => `<div class="check"><span class="ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.500" stroke-linecap="square" stroke-linejoin="miter"><path d="${d}"/></svg></span>${name}<span class="ok">${ICON.check}점검 완료</span></div>`).join('')}
           </div>
         </div>
       </div>
       <div class="wrap d-sec" ${(c.options || []).length ? '' : 'hidden'}>
-        <div class="sec-head"><p class="eyebrow rv">Options</p><h2 class="h2 rv" style="--d:1;font-size:clamp(28px,3.6vw,48px)">주요 옵션</h2></div>
+        <div class="sec-head"><p class="eyebrow en-h rv">Options</p><h2 class="h2 rv" style="--d:1;font-size:clamp(28px,3.6vw,48px)">주요 옵션</h2></div>
         <ul class="opts rv">${(c.options || []).map(o => `<li>${ICON.check}${esc(o)}</li>`).join('')}</ul>
       </div>
       <div class="wrap d-sec">
-        <div class="sec-head"><p class="eyebrow rv">Finance</p><h2 class="h2 rv" style="--d:1;font-size:clamp(28px,3.6vw,48px)">월 납입금 미리 보기</h2></div>
+        <div class="sec-head"><p class="eyebrow en-h rv">Finance</p><h2 class="h2 rv" style="--d:1;font-size:clamp(28px,3.6vw,48px)">월 납입금 미리 보기</h2></div>
         <div class="calc rv" id="calc">
           <div>
             <div class="rng"><label for="cDown">선수금 <b id="cDownV"></b></label><input id="cDown" type="range" min="0" max="70" step="5" value="30"></div>
@@ -590,7 +590,7 @@
     </section>
 
     <section class="feat">
-      <div class="wrap hl-top" style="margin-bottom:0"><div class="sec-head"><p class="eyebrow">More</p><h2 class="h2" style="font-size:clamp(28px,3.6vw,48px)">함께 볼 만한 매물</h2></div>
+      <div class="wrap hl-top" style="margin-bottom:0"><div class="sec-head"><p class="eyebrow en-h">More</p><h2 class="h2" style="font-size:clamp(28px,3.6vw,48px)">함께 볼 만한 매물</h2></div>
         <a class="link" href="#cars">전체 매물 보기 ${ICON.arrow}</a></div>
       <div class="rowscroll" id="simRow">${similar.map((x, i) => cardHTML(x, i)).join('')}</div>
       <div class="wrap paddles"><button class="round" id="simPrev" aria-label="이전 매물">${ICON.prev}</button><button class="round" id="simNext" aria-label="다음 매물">${ICON.next}</button></div>
