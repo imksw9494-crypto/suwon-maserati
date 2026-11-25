@@ -1,4 +1,4 @@
-/* 더원오토 · 매물 관리 화면 */
+/* 수원 마세라티 인증중고차 · 매물 관리 화면 */
 (() => {
   'use strict';
   const $ = (s, r = document) => r.querySelector(s);

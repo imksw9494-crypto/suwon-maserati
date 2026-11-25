@@ -1,4 +1,4 @@
-/* 더원오토 · 마세라티 인증 중고차 */
+/* 수원 마세라티 인증중고차 */
 html,body{background:#070E1B}
 :root{
   --navy-950:#050B16; --navy-900:#070E1B; --navy-850:#0A1528; --navy-800:#0F1D36; --navy-700:#182B4B; --navy-600:#24406B;
@@ -58,6 +58,7 @@ ul{list-style:none}
 .nav-in{height:100%;display:flex;align-items:center;justify-content:space-between;gap:24px}
 .brand{display:flex;align-items:center;gap:14px}
 .brand-logo{height:40px;width:auto;flex:none}
+.brand-mark.ko{font-size:16px;letter-spacing:-.02em;font-weight:700}
 .brand-mark{font-size:15px;font-weight:700;letter-spacing:.28em;white-space:nowrap}
 .brand-sub{padding-left:14px;border-left:1px solid var(--gold);font-size:11px;letter-spacing:.14em;color:var(--gold-soft);white-space:nowrap;line-height:1.2}
 .menu{display:flex;gap:34px;font-size:14px;color:rgba(245,242,234,.78)}
@@ -453,6 +454,50 @@ input[type=range]::-moz-range-thumb{width:14px;height:14px;border-radius:50%;bac
 .calc-out p{font-size:12.5px;color:var(--mute-d);line-height:1.6;margin-top:10px}
 
 /* =========================================================
+   MODEL STORY
+   ========================================================= */
+.st-hero{position:relative;background:radial-gradient(60% 46% at 50% 78%,color-mix(in srgb,var(--tint,#24406B) 42%,transparent),transparent 72%),linear-gradient(180deg,#070E1B,#081223 60%,#050B16);padding:calc(var(--nav-h) + 26px) 0 0;overflow:hidden;min-height:100svh;display:flex;flex-direction:column}
+.st-hero-in{position:relative;z-index:2;display:grid;gap:14px;justify-items:center;text-align:center}
+.st-hero .crumb{justify-self:start;margin-bottom:clamp(10px,3vh,34px)}
+.st-hero h1{font-size:clamp(44px,8vw,120px);font-weight:700;letter-spacing:-.05em;line-height:1.05}
+.st-tag{font-size:clamp(18px,2vw,26px);color:var(--gold-soft)}
+.st-name{position:absolute;left:50%;bottom:22%;transform:translateX(-50%);font-family:var(--serif);font-weight:500;font-size:clamp(70px,16vw,260px);line-height:.8;color:transparent;-webkit-text-stroke:1px rgba(200,168,110,.28);white-space:nowrap;user-select:none}
+.st-car{position:relative;z-index:1;flex:1;min-height:200px;display:grid;place-items:end center;padding:clamp(10px,3vh,30px) 4vw 0}
+.st-car img{max-height:min(38vh,400px);width:auto;max-width:min(1000px,94vw);filter:drop-shadow(0 34px 28px rgba(0,0,0,.55));opacity:0;transform:translateX(12vw) scale(.97);transition:opacity 1.1s .15s,transform 1.7s var(--ease-out) .15s}
+.st-hero.ready .st-car img{opacity:1;transform:none}
+.st-chips{position:relative;z-index:2;display:flex;justify-content:center;gap:clamp(18px,4vw,60px);padding:18px 0 26px;font-size:14px;color:var(--ivory);flex-wrap:wrap}
+.st-chips b{display:block;font-size:11px;font-weight:500;letter-spacing:.18em;color:var(--mute-d);text-transform:uppercase;margin-bottom:2px}
+.st-intro{background:var(--navy-900);padding:clamp(80px,11vw,160px) 0}
+.st-lead{font-size:clamp(22px,3vw,40px);font-weight:700;line-height:1.5;letter-spacing:-.035em;max-width:980px;margin-inline:auto;text-align:center}
+.st-origin{padding:clamp(80px,11vw,150px) 0}
+.st-origin-in{display:grid;grid-template-columns:1fr 1.25fr;gap:clamp(30px,6vw,90px);align-items:start}
+.st-origin .h2{margin-top:16px}
+.st-quote{font-size:clamp(18px,1.9vw,24px);line-height:1.8;color:var(--ink-2);border-left:2px solid var(--gold-deep);padding-left:clamp(18px,2.4vw,32px)}
+.st-time{background:var(--navy-950);padding:clamp(80px,11vw,150px) 0}
+.tl{list-style:none;margin-top:clamp(36px,5vw,64px);position:relative;display:grid;gap:0}
+.tl::before{content:"";position:absolute;left:clamp(96px,13vw,190px);top:10px;bottom:10px;width:1px;background:linear-gradient(180deg,var(--gold),rgba(200,168,110,.12))}
+.tl li{display:grid;grid-template-columns:clamp(96px,13vw,190px) 1fr;align-items:start;padding:clamp(20px,3vw,36px) 0;position:relative}
+.tl li::before{content:"";position:absolute;left:calc(clamp(96px,13vw,190px) - 5px);top:calc(clamp(20px,3vw,36px) + 18px);width:11px;height:11px;border-radius:50%;background:var(--navy-950);border:2px solid var(--gold)}
+.tl-y{font-size:clamp(30px,4.4vw,60px);line-height:1;color:var(--gold-soft)}
+.tl li>div{padding-left:clamp(26px,4vw,60px)}
+.tl h3{font-size:clamp(20px,2.2vw,28px);font-weight:700;letter-spacing:-.03em}
+.tl p{margin-top:8px;color:var(--mute-d);max-width:620px}
+.st-feat{padding:clamp(80px,11vw,150px) 0}
+.st-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:clamp(36px,5vw,64px)}
+.st-grid .tile{min-height:230px}
+.st-no{font-size:34px;color:var(--gold-deep);line-height:1}
+.st-fit{margin-top:16px;border-radius:var(--r-lg);background:var(--navy-850);color:var(--ivory);padding:clamp(26px,3.4vw,44px);display:grid;grid-template-columns:auto 1fr;gap:clamp(20px,4vw,60px);align-items:center}
+.st-fit h3{font-size:clamp(20px,2.2vw,28px);font-weight:700;letter-spacing:-.03em}
+.st-fit ul{display:grid;gap:10px}
+.st-fit li{display:flex;gap:12px;align-items:center;font-size:16.5px}
+.st-fit li svg{color:var(--gold);flex:none}
+.st-nav{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:clamp(50px,7vw,90px);padding-top:30px;border-top:1px solid var(--line-d)}
+.st-nav a{display:grid;gap:2px;transition:color .3s}
+.st-nav a:hover{color:var(--gold-soft)}
+.st-nav small{font-size:12px;letter-spacing:.14em;color:var(--mute-d)}
+.st-nav b{font-size:clamp(22px,3vw,36px);font-weight:700;letter-spacing:-.03em}
+
+/* =========================================================
    RESPONSIVE
    ========================================================= */
 @media (max-width:1060px){
@@ -479,6 +524,7 @@ input[type=range]::-moz-range-thumb{width:14px;height:14px;border-radius:50%;bac
   .brand-sub{display:none}
   .brand-logo{height:32px}
   .brand-mark{font-size:12.5px;letter-spacing:.2em}
+  .brand-mark.ko{font-size:14px;letter-spacing:-.02em}
   .nav-cta .btn{display:none}
   .bar{display:flex}
   .hero{height:165vh}
@@ -514,7 +560,11 @@ input[type=range]::-moz-range-thumb{width:14px;height:14px;border-radius:50%;bac
   .s4{display:grid;grid-template-columns:55px 1fr;gap:4px 20px;padding-right:0}
   .s4 .dot{font-variant-numeric:lining-nums;grid-row:span 2}
   .s4 h3{margin-top:4px}
-  .faq,.contact-grid,.d-cols,.calc{grid-template-columns:1fr}
+  .faq,.contact-grid,.d-cols,.calc,.st-origin-in,.st-grid,.st-fit{grid-template-columns:1fr}
+  .st-car img{max-width:118vw;max-height:none;width:118vw}
+  .st-name{bottom:30%;font-size:24vw}
+  .st-chips{padding-bottom:96px}
+  .tl li>div{padding-left:22px}
   .f2{grid-template-columns:1fr}
   .filters-in{flex-direction:column;align-items:stretch;gap:10px;padding:10px 0}
   .chips{margin-inline:-20px;padding-inline:20px}

@@ -1,4 +1,4 @@
-/* 더원오토 · 마세라티 인증 중고차 — 화면 동작 */
+/* 수원 마세라티 인증중고차 — 화면 동작 */
 (() => {
   'use strict';
   const $ = (s, r = document) => r.querySelector(s);
@@ -91,7 +91,7 @@
   /* =====================================================
      라우터 : #home · #cars · #cars-모델 · #car-아이디 · #섹션
      ===================================================== */
-  const PAGES = { home: $('#p-home'), cars: $('#p-cars'), car: $('#p-car') };
+  const PAGES = { home: $('#p-home'), cars: $('#p-cars'), car: $('#p-car'), model: $('#p-model') };
   const SECTIONS = ['highlights', 'models', 'program', 'inspection', 'featured', 'process', 'faq', 'contact'];
   let current = null;
   const nav = $('#nav'), drawer = $('#drawer'), burger = $('#burger');
@@ -101,26 +101,29 @@
     let page = 'home', arg = null, sec = null;
     if (h === 'cars' || h.startsWith('cars-')) { page = 'cars'; arg = h.slice(5) || 'all'; }
     else if (h.startsWith('car-')) { page = 'car'; arg = h.slice(4); }
+    else if (h.startsWith('model-')) { page = 'model'; arg = h.slice(6); }
     else if (SECTIONS.includes(h)) sec = h;
 
     closeDrawer();
-    const changed = current !== page || page === 'car';
+    const changed = current !== page || page === 'car' || page === 'model';
     if (changed) {
       Object.entries(PAGES).forEach(([k, el]) => { el.hidden = k !== page; });
       const el = PAGES[page]; el.style.animation = 'none'; void el.offsetWidth; el.style.animation = '';
     }
     if (page === 'cars') renderCars(arg);
     if (page === 'car') renderCar(arg);
+    if (page === 'model') renderModel(arg);
     current = page;
 
     $$('.menu a').forEach(a => {
       const k = a.getAttribute('href').slice(1);
-      a.classList.toggle('on', (page !== 'home' && k === 'cars') || (page === 'home' && k === sec));
+      a.classList.toggle('on', ((page === 'cars' || page === 'car') && k === 'cars') || (page === 'model' && k === 'models') || (page === 'home' && k === sec));
     });
     $('#bar').style.display = '';
-    document.title = page === 'cars' ? '매물 | 더원오토 마세라티 인증 중고차'
-      : page === 'car' ? `${$('#p-car h1')?.dataset.t || '매물'} | 더원오토`
-      : '더원오토 | 마세라티 인증 중고차';
+    document.title = page === 'cars' ? '매물 | 수원 마세라티 인증중고차'
+      : page === 'model' ? `${MODELS[arg]?.ko || '모델'} 이야기 | 수원 마세라티 인증중고차`
+      : page === 'car' ? `${$('#p-car h1')?.dataset.t || '매물'} | 수원 마세라티 인증중고차`
+      : '수원 마세라티 인증중고차';
 
     if (sec) {
       const target = document.getElementById(sec);
@@ -270,7 +273,7 @@
       const m = MODELS[k];
       return `<div class="mv-item" data-k="${k}">
         <button class="mv-btn" role="tab"><span class="plus">${ICON.plus}</span>${m.ko}<small>${m.body}</small></button>
-        <div class="mv-more"><div><p>${m.desc}</p><a class="link" href="#cars-${k}">인증 매물 ${count(k)}대 보기 ${ICON.arrow}</a></div></div>
+        <div class="mv-more"><div><p>${m.desc}</p><a class="link" href="#model-${k}">${m.ko} 이야기 보기 ${ICON.arrow}</a></div></div>
       </div>`;
     }).join('');
     carBox.innerHTML = ORDER.map(k => `<img data-k="${k}" src="${MODELS[k].img}" alt="마세라티 ${MODELS[k].ko}" loading="lazy">`).join('');
@@ -285,8 +288,8 @@
       });
       $('#mvName').innerHTML = `<span>${m.en}</span>`;
       $('#mvBody').textContent = m.body; $('#mvEngine').textContent = m.engine; $('#mvDrive').textContent = m.drive;
-      $('#mvGo').href = `#cars-${k}`; stage.style.setProperty('--tint', m.tint);
-      $('#mvDescM').innerHTML = `<p>${m.desc}</p><a class="link" href="#cars-${k}">인증 매물 ${count(k)}대 보기 ${ICON.arrow}</a>`;
+      $('#mvGo').href = `#model-${k}`; stage.style.setProperty('--tint', m.tint);
+      $('#mvDescM').innerHTML = `<p>${m.desc}</p><a class="link" href="#model-${k}">${m.ko} 이야기 보기 ${ICON.arrow}</a>`;
       cur = k;
     };
     list.addEventListener('click', e => { const it = e.target.closest('.mv-item'); if (it && e.target.closest('.mv-btn')) select(it.dataset.k); });
@@ -361,7 +364,7 @@
       fetch('https://formsubmit.co/ajax/' + encodeURIComponent(SITE.notifyEmail), {
         method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
         body: JSON.stringify({
-          _subject: `[더원오토] 상담 신청 - ${row.name}${row.car_title ? ' / ' + row.car_title : row.model ? ' / ' + row.model : ''}`, _template: 'table', _captcha: 'false',
+          _subject: `[수원 마세라티 인증중고차] 상담 신청 - ${row.name}${row.car_title ? ' / ' + row.car_title : row.model ? ' / ' + row.model : ''}`, _template: 'table', _captcha: 'false',
           '이름': row.name, '연락처': row.phone, '관심 모델': row.model || '-', '문의 차량': row.car_title || '-', '방문 희망일': row.visit_date || '-', '문의 내용': row.message || '-',
           '확인': new URL('admin.html', location.href).href
         })
@@ -376,7 +379,7 @@
       if (!f.agree.checked) { toast('개인정보 수집·이용에 동의해 주세요'); f.agree.focus(); return; }
       const row = { name: name.slice(0, 40), phone: telv.slice(0, 30), model: f.model.value, visit_date: f.date.value || null,
         message: f.msg.value.trim().slice(0, 2000), car_id: f.dataset.carId || '', car_title: f.dataset.carTitle || '' };
-      const lines = ['[더원오토 마세라티 인증 중고차 상담 신청]', `이름: ${row.name}`, `연락처: ${row.phone}`];
+      const lines = ['[수원 마세라티 인증중고차 상담 신청]', `이름: ${row.name}`, `연락처: ${row.phone}`];
       if (row.model) lines.push(`관심 모델: ${row.model}`);
       if (row.visit_date) lines.push(`방문 희망일: ${row.visit_date}`);
       if (row.message) lines.push(`문의: ${row.message}`);
@@ -396,7 +399,7 @@
     });
     $('#form').addEventListener('input', () => { if (!$('#formDone').hidden) { $('#formDone').hidden = true; formBtn.hidden = false; } });
 
-    const biz = [SITE.name || '더원오토', SITE.ceo && `대표 ${SITE.ceo}`, SITE.bizNo && `사업자등록번호 ${SITE.bizNo}`, SITE.address, SITE.phone && `전화 ${SITE.phone}`].filter(Boolean);
+    const biz = [SITE.name || '수원 마세라티 인증중고차', SITE.ceo && `대표 ${SITE.ceo}`, SITE.bizNo && `사업자등록번호 ${SITE.bizNo}`, SITE.address, SITE.phone && `전화 ${SITE.phone}`].filter(Boolean);
     $('#footBiz').textContent = biz.join(' · ');
     $('#year').textContent = new Date().getFullYear();
   }
@@ -575,6 +578,64 @@
   }
 
   /* =====================================================
+     모델 이야기 (#model-모델이름)
+     ===================================================== */
+  function renderModel(k) {
+    const m = MODELS[k], s = (window.STORIES || {})[k], el = PAGES.model;
+    if (!m || !s) { el.innerHTML = `<section class="sub-hero" style="min-height:70vh"><div class="wrap"><p class="eyebrow">Not Found</p><h1>모델을 찾을 수 없습니다</h1><p><a class="btn btn-gold" href="#models">모델 전체 보기</a></p></div></section>`; return; }
+    const br = t => esc(t).replace(/\n/g, '<br>');
+    const n = CARS.filter(c => c.model === k && c.status !== '판매완료').length;
+    const i = ORDER.indexOf(k), prev = ORDER[(i + ORDER.length - 1) % ORDER.length], next = ORDER[(i + 1) % ORDER.length];
+    const mine = CARS.filter(c => c.model === k && c.status !== '판매완료').slice(0, 6);
+    el.innerHTML = `
+    <section class="st-hero" style="--tint:${m.tint}">
+      <div class="st-name" aria-hidden="true">${m.en}</div>
+      <div class="wrap st-hero-in">
+        <nav class="crumb" aria-label="현재 위치"><a href="#home">홈</a>${ICON.arrow}<a href="#models">모델</a>${ICON.arrow}<span>${m.ko}</span></nav>
+        <p class="eyebrow">Maserati ${m.en}</p>
+        <h1>${m.ko}</h1>
+        <p class="st-tag">${esc(s.tagline)}</p>
+        <div class="hero-cta" style="opacity:1;transform:none"><a class="btn btn-gold" href="#cars-${k}">${m.ko} 인증 매물 ${n ? n + '대 ' : ''}보기</a><a class="btn btn-ghost" href="#contact">상담 예약</a></div>
+      </div>
+      <div class="st-car"><img src="${m.img}" alt="마세라티 ${m.ko}"></div>
+      <ul class="st-chips wrap"><li><b>Body</b>${m.body}</li><li><b>Engine</b>${m.engine}</li><li><b>Drive</b>${m.drive}</li></ul>
+    </section>
+
+    <section class="st-intro"><div class="wrap"><p class="st-lead rv">${br(s.intro)}</p>
+      <div class="stats">${s.stats.map(([v, u, l], x) => `<div class="stat rv" style="--d:${x}"><span class="num">${esc(v)}${u ? `<sup>${esc(u)}</sup>` : ''}</span><p>${esc(l)}</p></div>`).join('')}</div>
+    </div></section>
+
+    <section class="st-origin light"><div class="wrap st-origin-in">
+      <div class="rv"><p class="eyebrow">이름의 유래</p><h2 class="h2">${esc(s.name.title)}</h2></div>
+      <p class="st-quote rv" style="--d:1">${br(s.name.text)}</p>
+    </div></section>
+
+    <section class="st-time"><div class="wrap">
+      <div class="sec-head"><p class="eyebrow rv">History</p><h2 class="h2 rv" style="--d:1">${m.ko}가 걸어온 길</h2></div>
+      <ol class="tl">${s.timeline.map(([y, t, d]) => `<li class="rv"><span class="tl-y num">${esc(y)}</span><div><h3>${esc(t)}</h3><p>${br(d)}</p></div></li>`).join('')}</ol>
+    </div></section>
+
+    <section class="st-feat light"><div class="wrap">
+      <div class="sec-head center"><p class="eyebrow rv">Character</p><h2 class="h2 rv" style="--d:1">${m.ko}를 ${m.ko}답게 만드는 것</h2></div>
+      <div class="st-grid">${s.features.map(([t, d], x) => `<article class="tile rv" style="--d:${x % 2}"><span class="num st-no">${String(x + 1).padStart(2, '0')}</span><div><h3>${esc(t)}</h3><p>${br(d)}</p></div></article>`).join('')}</div>
+      <div class="st-fit rv"><h3>이런 분께 어울립니다</h3><ul>${s.fit.map(f => `<li>${ICON.check}${esc(f)}</li>`).join('')}</ul></div>
+    </div></section>
+
+    <section class="feat">
+      <div class="wrap hl-top" style="margin-bottom:0"><div class="sec-head"><p class="eyebrow">Inventory</p><h2 class="h2" style="font-size:clamp(28px,3.6vw,48px)">지금 만날 수 있는 ${m.ko}</h2></div>
+        <a class="link" href="#cars-${k}">${m.ko} 매물 전체 보기 ${ICON.arrow}</a></div>
+      <div class="rowscroll" id="stRow">${mine.length ? mine.map((c, x) => cardHTML(c, x)).join('') : `<div class="empty" style="flex:1">지금은 등록된 ${m.ko} 매물이 없습니다<br>상담을 남겨 주시면 입고 소식을 먼저 알려 드립니다<p style="margin-top:16px"><a class="btn btn-ghost btn-sm" href="#contact">입고 알림 상담하기</a></p></div>`}</div>
+      <div class="wrap paddles"><button class="round" id="stPrev" aria-label="이전 매물">${ICON.prev}</button><button class="round" id="stNext" aria-label="다음 매물">${ICON.next}</button></div>
+      <div class="wrap st-nav">
+        <a href="#model-${prev}"><small>이전 모델</small><b>${MODELS[prev].ko}</b></a>
+        <a href="#model-${next}" style="text-align:right"><small>다음 모델</small><b>${MODELS[next].ko}</b></a>
+      </div>
+    </section>`;
+    rowPaddles($('#stRow'), $('#stPrev'), $('#stNext'));
+    requestAnimationFrame(() => requestAnimationFrame(() => $('.st-hero', el)?.classList.add('ready')));
+  }
+
+  /* =====================================================
      매물 불러오기 : 저장소가 연결돼 있으면 거기서, 아니면 예시 데이터
      ===================================================== */
   const fromRow = r => ({
@@ -599,7 +660,11 @@
 
   /* ---------- 시작 ---------- */
   // 매물 페이지 주소로 바로 들어온 경우, 불러오는 동안 메인이 잠깐 비치지 않게 한다
-  if (/^#cars?(-|$)/.test(location.hash)) { PAGES.home.hidden = true; nav.classList.add('solid'); }
+  if (/^#(cars?|model)(-|$)/.test(location.hash)) { PAGES.home.hidden = true; nav.classList.add('solid'); }
   splitSay(); initHero(); initHighlights(); initCounts(); initStory(); initAcc(); initContact(); initCredits();
-  loadCars().then(() => { initModels(); initFeatured(); route(); });
+  // 저장소 응답이 늦거나 멈춰도 화면은 뜨게 한다 (6초 넘으면 매물 없이 먼저 표시)
+  let started = false;
+  const start = () => { if (started) { initFeatured(); route(); return; } started = true; initModels(); initFeatured(); route(); };
+  const slow = setTimeout(() => { if (!started) { LOAD_ERR = !SAMPLE; start(); } }, 6000);
+  loadCars().then(() => { clearTimeout(slow); if (CARS.length) LOAD_ERR = false; start(); });
 })();
